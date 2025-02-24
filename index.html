@@ -225,20 +225,35 @@
         .url-container button:hover {
             background: #cc3333;
         }
+        #statsBtn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #8e2de2;
+        }
+        #statsBtn:hover {
+            background: #7a25c9;
+        }
         #analytics {
-            margin-top: 40px;
+            position: absolute;
+            top: 50px;
+            left: 10px;
             background: #1e1e1e;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 100;
         }
         #analytics h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
+            font-size: 20px;
+            margin-bottom: 10px;
             color: #8e2de2;
         }
         #analytics p {
-            font-size: 16px;
+            font-size: 14px;
             margin: 5px 0;
         }
         @media (max-width: 800px) {
@@ -271,6 +286,21 @@
                 font-size: 14px;
                 padding: 8px 16px;
             }
+            #statsBtn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            #analytics {
+                top: 40px;
+                left: 5px;
+                padding: 10px;
+            }
+            #analytics h3 {
+                font-size: 16px;
+            }
+            #analytics p {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -284,12 +314,6 @@
             <div class="feature"><i class="fas fa-ad"></i><p>Ad Free<br>We don’t give a F**k about money, just study, ffs.</p></div>
             <div class="feature"><i class="fas fa-moon"></i><p>Dark Mode<br>Save your eyes for the D-day.</p></div>
         </div>
-        <div id="analytics">
-            <h3>Your Focus Stats</h3>
-            <p>Total Focus Time: <span id="totalFocusTime">0</span> min</p>
-            <p>Total Distractions: <span id="totalDistractions">0</span></p>
-            <p>Videos Watched: <span id="totalVideosWatched">0</span></p>
-        </div>
     </div>
     <div id="signinForm" style="display: none;">
         <div class="title">Sign In to Track Your Points</div>
@@ -300,6 +324,13 @@
         <p>New? <button onclick="createAccount()">Create Account</button></p>
     </div>
     <div id="inputForm" style="display: none;">
+        <button id="statsBtn" onclick="toggleStats()">Your Focus Stats</button>
+        <div id="analytics">
+            <h3>Your Focus Stats</h3>
+            <p>Total Focus Time: <span id="totalFocusTime">0</span> min</p>
+            <p>Total Distractions: <span id="totalDistractions">0</span></p>
+            <p>Videos Watched: <span id="totalVideosWatched">0</span></p>
+        </div>
         <div class="title">Enter YouTube URLs</div>
         <div class="subtitle"></div>
         <select id="playlistSelect" onchange="loadPlaylist()">
@@ -604,6 +635,16 @@
             document.getElementById('totalVideosWatched').textContent = totalVideosWatched;
         }
 
+        function toggleStats() {
+            const analytics = document.getElementById('analytics');
+            if (analytics.style.display === 'block') {
+                analytics.style.display = 'none';
+            } else {
+                updateAnalytics(); // Ensure latest stats are shown
+                analytics.style.display = 'block';
+            }
+        }
+
         function saveState() {
             const timerText = document.getElementById('timerText').textContent;
             const timerMatch = timerText.match(/^(.*?): (\d+) min (\d+) sec$/);
@@ -721,6 +762,7 @@
                 document.getElementById('timerText').textContent = `${mode}: ${Math.floor(timerRemaining / 60)} min ${timerRemaining % 60} sec`;
                 document.getElementById('progressFill').style.width = ((duration / 1000 - timerRemaining) / (duration / 1000)) * 100 + '%';
                 saveState();
+                updateAnalytics(); // Live update during timer
             }, 1000);
         }
 
@@ -866,6 +908,7 @@
             urlInputs.innerHTML = '<div class="url-container"><input type="text" class="youtube-url" placeholder="YouTube URL" required></div>';
             updateAnalytics();
             populatePlaylistSelect();
+            document.getElementById('analytics').style.display = 'none'; // Hide stats on reset
         }
     </script>
 </body>
