@@ -12,7 +12,7 @@
             box-sizing: border-box;
         }
         body {
-            background-color: #121212;
+            background-color: #2a2a2a;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -24,9 +24,11 @@
         #landingPage, #signinForm, #inputForm {
             text-align: center;
             width: 100%;
-            max-width: 800px; /* Wider for landscape desktop */
+            max-width: 800px;
             margin: 0 auto;
             padding: 40px 20px;
+            display: block;
+            position: relative;
         }
         #landingPage .title, #signinForm .title, #inputForm .title {
             font-size: 48px;
@@ -89,7 +91,7 @@
             font-size: 14px;
             color: #fff;
         }
-        #signinForm input, #inputForm input {
+        #signinForm input, #inputForm input, #inputForm select {
             display: block;
             width: 100%;
             max-width: 320px;
@@ -104,7 +106,7 @@
             outline: none;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        #signinForm input:focus, #inputForm input:focus {
+        #signinForm input:focus, #inputForm input:focus, #inputForm select:focus {
             border-color: #8e2de2;
             box-shadow: 0 0 5px rgba(142, 45, 226, 0.5);
         }
@@ -114,6 +116,7 @@
             aspect-ratio: 16/9;
             border-radius: 10px;
             overflow: hidden;
+            display: none;
         }
         #timerDisplay {
             position: fixed;
@@ -153,7 +156,17 @@
             position: fixed;
             top: 10px;
             right: 10px;
+            background: #8e2de2;
+            padding: 10px 20px;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
             z-index: 103;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #restartBtn:hover {
+            background: #7a25c9;
         }
         #videoSidebar {
             position: fixed;
@@ -162,7 +175,7 @@
             width: 300px;
             height: 100%;
             background: rgba(0,0,0,0.9);
-            transition: 0.3s;
+            transition: right 0.3s ease;
             padding: 20px;
             overflow-y: auto;
             z-index: 102;
@@ -172,6 +185,7 @@
             margin-bottom: 10px;
             cursor: pointer;
             border: 2px solid transparent;
+            border-radius: 8px;
         }
         .thumbnail:hover {
             border-color: #8e2de2;
@@ -182,10 +196,10 @@
             right: 5px;
             background: none;
             border: none;
-            color: white;
+            color: #fff;
             cursor: pointer;
+            font-size: 18px;
         }
-        /* Gradient background for landing and sign-in pages */
         #landingPage::after, #signinForm::after, #inputForm::after {
             content: '';
             position: absolute;
@@ -196,6 +210,36 @@
             background: linear-gradient(to bottom, rgba(142, 45, 226, 0.2), transparent);
             z-index: -1;
             border-radius: 15px;
+        }
+        .url-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .url-container button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: #ff4444;
+            font-size: 14px;
+        }
+        .url-container button:hover {
+            background: #cc3333;
+        }
+        #analytics {
+            margin-top: 40px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        #analytics h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #8e2de2;
+        }
+        #analytics p {
+            font-size: 16px;
+            margin: 5px 0;
         }
         @media (max-width: 800px) {
             #landingPage, #signinForm, #inputForm {
@@ -223,6 +267,10 @@
             #player {
                 max-width: 100%;
             }
+            #restartBtn {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -231,10 +279,16 @@
         <div class="title">Watch Videos without distraction like a <span>GIGACHAD!</span></div>
         <div class="subtitle"></div>
         <button onclick="showSignIn()">Get Started</button>
-        <button class="github-btn" onclick="window.open('https://github.com/yourusername/your-repo', '_blank')">GitHub</button>
+        <button class="github-btn" onclick="window.open('https://github.com/the-chosen-one-o5/UltraFocusModeYT', '_blank')">GitHub</button>
         <div id="features">
             <div class="feature"><i class="fas fa-ad"></i><p>Ad Free<br>We don’t give a F**k about money, just study, ffs.</p></div>
             <div class="feature"><i class="fas fa-moon"></i><p>Dark Mode<br>Save your eyes for the D-day.</p></div>
+        </div>
+        <div id="analytics">
+            <h3>Your Focus Stats</h3>
+            <p>Total Focus Time: <span id="totalFocusTime">0</span> min</p>
+            <p>Total Distractions: <span id="totalDistractions">0</span></p>
+            <p>Videos Watched: <span id="totalVideosWatched">0</span></p>
         </div>
     </div>
     <div id="signinForm" style="display: none;">
@@ -248,14 +302,20 @@
     <div id="inputForm" style="display: none;">
         <div class="title">Enter YouTube URLs</div>
         <div class="subtitle"></div>
-        <input type="text" id="url1" placeholder="YouTube URL 1" required>
-        <input type="text" id="url2" placeholder="YouTube URL 2">
-        <input type="text" id="url3" placeholder="YouTube URL 3">
-        <h2 style="font-size: 20px; margin: 20px 0 10px;">Upload Custom Audio</h2>
-        <input type="file" id="audioUpload" accept="audio/*">
+        <select id="playlistSelect" onchange="loadPlaylist()">
+            <option value="">Select a Playlist</option>
+        </select>
+        <input type="text" id="playlistName" placeholder="Playlist Name (optional)">
+        <button onclick="savePlaylist()">Save Playlist</button>
+        <div id="urlInputs">
+            <div class="url-container">
+                <input type="text" class="youtube-url" placeholder="YouTube URL" required>
+            </div>
+        </div>
+        <button onclick="addUrlInput()">Add Another URL</button>
         <button onclick="startPlayback()">Start Focus Mode</button>
     </div>
-    <div id="player"></div>
+    <div id="player" style="display: none;"></div>
     <div id="timerDisplay">
         <button id="minimizeBtn" onclick="toggleMinimize()">-</button>
         <span id="timerText"></span>
@@ -265,9 +325,8 @@
     <button id="restartBtn" onclick="resetFocusMode()">Restart</button>
     <div id="videoSidebar"></div>
     
-    <audio id="customAudio" preload="auto" loop></audio>
+    <audio id="focusAudio" preload="auto" src="https://the-chosen-one-o5.github.io/UltraFocusModeYT/focus.mp3"></audio>
 
-    <!-- Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
 
     <script>
@@ -283,9 +342,14 @@
         const focusDuration = 50 * 60 * 1000;
         const firstBreakDuration = 15 * 60 * 1000;
         const secondBreakDuration = 10 * 60 * 1000;
-        let hasCustomAudio = false;
         let timerMode = 'Focus Time';
         let timerRemaining = focusDuration / 1000;
+        let completedVideos = new Set();
+        let allVideosCompleted = false;
+        let totalFocusTime = 0; // In minutes
+        let totalDistractions = 0;
+        let totalVideosWatched = 0;
+        let playlists = JSON.parse(localStorage.getItem('playlists') || '[]');
 
         window.onload = function() {
             const savedState = localStorage.getItem('focusModeState');
@@ -295,28 +359,32 @@
                 currentVideoIndex = state.currentVideoIndex || 0;
                 distractionCount = state.distractionCount || 0;
                 points = state.points || 0;
-                hasCustomAudio = state.hasCustomAudio || false;
                 timerMode = state.timerMode || 'Focus Time';
                 timerRemaining = state.timerRemaining || (focusDuration / 1000);
                 isFocusModeActive = state.isFocusModeActive || false;
                 isSignedIn = state.isSignedIn || false;
                 currentUser = state.currentUser || null;
+                completedVideos = new Set(state.completedVideos || []);
+                allVideosCompleted = state.allVideosCompleted || false;
+                totalFocusTime = state.totalFocusTime || 0;
+                totalDistractions = state.totalDistractions || 0;
+                totalVideosWatched = state.totalVideosWatched || 0;
 
+                updateAnalytics();
                 if (isSignedIn && currentUser) {
                     document.getElementById('landingPage').style.display = 'none';
                     document.getElementById('signinForm').style.display = 'none';
                     document.getElementById('inputForm').style.display = 'block';
                     document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                    restoreUrlInputs();
+                    populatePlaylistSelect();
                 }
                 if (videoIds.length > 0) {
                     document.getElementById('inputForm').style.display = 'none';
+                    document.getElementById('player').style.display = 'block';
                     document.getElementById('restartBtn').style.display = 'block';
                     populateVideoSidebar();
                     loadYouTubeAPI();
-                    if (hasCustomAudio && state.audioData) {
-                        const audioBlob = dataURLtoBlob(state.audioData);
-                        document.getElementById('customAudio').src = URL.createObjectURL(audioBlob);
-                    }
                     if (isFocusModeActive) {
                         startTimer(timerRemaining * 1000, timerMode);
                     }
@@ -328,15 +396,9 @@
                 document.getElementById('landingPage').style.display = 'block';
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'none';
+                updateAnalytics();
             }
         };
-
-        function dataURLtoBlob(dataurl) {
-            const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while (n--) u8arr[n] = bstr.charCodeAt(n);
-            return new Blob([u8arr], { type: mime });
-        }
 
         function showSignIn() {
             document.getElementById('landingPage').style.display = 'none';
@@ -352,11 +414,16 @@
                 isSignedIn = true;
                 currentUser = username;
                 points = users[username].points || 0;
+                totalFocusTime = users[username].totalFocusTime || 0;
+                totalDistractions = users[username].totalDistractions || 0;
+                totalVideosWatched = users[username].totalVideosWatched || 0;
                 document.getElementById('landingPage').style.display = 'none';
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'block';
                 document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                updateAnalytics();
                 saveState();
+                populatePlaylistSelect();
             } else {
                 alert('Invalid username or password');
             }
@@ -369,18 +436,76 @@
             if (users[username]) {
                 alert('Username already exists');
             } else if (username && password) {
-                users[username] = { password, points: 0 };
+                users[username] = { password, points: 0, totalFocusTime: 0, totalDistractions: 0, totalVideosWatched: 0 };
                 localStorage.setItem('users', JSON.stringify(users));
                 isSignedIn = true;
                 currentUser = username;
                 points = 0;
+                totalFocusTime = 0;
+                totalDistractions = 0;
+                totalVideosWatched = 0;
                 document.getElementById('landingPage').style.display = 'none';
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'block';
                 document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                updateAnalytics();
                 saveState();
+                populatePlaylistSelect();
             } else {
                 alert('Please enter a username and password');
+            }
+        }
+
+        function addUrlInput() {
+            const urlInputs = document.getElementById('urlInputs');
+            const container = document.createElement('div');
+            container.className = 'url-container';
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.className = 'youtube-url';
+            newInput.placeholder = 'YouTube URL';
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'X';
+            removeBtn.onclick = () => {
+                if (urlInputs.children.length > 1) urlInputs.removeChild(container);
+            };
+            container.appendChild(newInput);
+            container.appendChild(removeBtn);
+            urlInputs.appendChild(container);
+        }
+
+        function restoreUrlInputs() {
+            const urlInputs = document.getElementById('urlInputs');
+            urlInputs.innerHTML = '';
+            videoIds.forEach((id, index) => {
+                const container = document.createElement('div');
+                container.className = 'url-container';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'youtube-url';
+                input.placeholder = 'YouTube URL';
+                input.value = `https://www.youtube.com/watch?v=${id}`;
+                container.appendChild(input);
+                if (index > 0) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'X';
+                    removeBtn.onclick = () => {
+                        if (urlInputs.children.length > 1) urlInputs.removeChild(container);
+                    };
+                    container.appendChild(removeBtn);
+                }
+                urlInputs.appendChild(container);
+            });
+            if (videoIds.length === 0) {
+                const container = document.createElement('div');
+                container.className = 'url-container';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'youtube-url';
+                input.placeholder = 'YouTube URL';
+                input.required = true;
+                container.appendChild(input);
+                urlInputs.appendChild(container);
             }
         }
 
@@ -400,32 +525,69 @@
         }
 
         function startPlayback() {
-            const urls = [url1.value, url2.value, url3.value].filter(url => url.trim() !== '');
-            videoIds = urls.map(url => extractVideoId(url)).filter(id => id !== null);
-            
+            const urlInputs = document.querySelectorAll('.youtube-url');
+            const urls = Array.from(urlInputs)
+                .map(input => input.value.trim())
+                .filter(url => url !== '');
+            videoIds = urls.map(extractVideoId).filter(id => id !== null);
+
             if (videoIds.length === 0) {
                 alert('Please enter at least one valid YouTube URL');
                 return;
             }
 
-            const audioUpload = document.getElementById('audioUpload');
-            if (audioUpload.files[0]) {
-                hasCustomAudio = true;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('customAudio').src = e.target.result;
-                    saveState();
-                };
-                reader.readAsDataURL(audioUpload.files[0]);
-            }
-
             document.getElementById('inputForm').style.display = 'none';
+            document.getElementById('player').style.display = 'block';
             enterFullscreen();
             startFocusBreakLoop();
             document.getElementById('restartBtn').style.display = 'block';
             populateVideoSidebar();
             saveState();
             loadYouTubeAPI();
+        }
+
+        function savePlaylist() {
+            const playlistName = document.getElementById('playlistName').value.trim();
+            if (!playlistName) {
+                alert('Please enter a playlist name');
+                return;
+            }
+            const urlInputs = document.querySelectorAll('.youtube-url');
+            const urls = Array.from(urlInputs)
+                .map(input => input.value.trim())
+                .filter(url => url !== '');
+            const videoIdsForPlaylist = urls.map(extractVideoId).filter(id => id !== null);
+            if (videoIdsForPlaylist.length === 0) {
+                alert('Please enter at least one valid YouTube URL to save a playlist');
+                return;
+            }
+            playlists = playlists.filter(p => p.name !== playlistName); // Update if exists
+            playlists.push({ name: playlistName, videoIds: videoIdsForPlaylist });
+            localStorage.setItem('playlists', JSON.stringify(playlists));
+            populatePlaylistSelect();
+            alert(`Playlist "${playlistName}" saved!`);
+            document.getElementById('playlistName').value = '';
+        }
+
+        function populatePlaylistSelect() {
+            const select = document.getElementById('playlistSelect');
+            select.innerHTML = '<option value="">Select a Playlist</option>';
+            playlists.forEach(playlist => {
+                const option = document.createElement('option');
+                option.value = playlist.name;
+                option.textContent = playlist.name;
+                select.appendChild(option);
+            });
+        }
+
+        function loadPlaylist() {
+            const playlistName = document.getElementById('playlistSelect').value;
+            if (!playlistName) return;
+            const playlist = playlists.find(p => p.name === playlistName);
+            if (playlist) {
+                videoIds = playlist.videoIds;
+                restoreUrlInputs();
+            }
         }
 
         function loadYouTubeAPI() {
@@ -436,8 +598,13 @@
             }
         }
 
+        function updateAnalytics() {
+            document.getElementById('totalFocusTime').textContent = totalFocusTime;
+            document.getElementById('totalDistractions').textContent = totalDistractions;
+            document.getElementById('totalVideosWatched').textContent = totalVideosWatched;
+        }
+
         function saveState() {
-            const audioData = hasCustomAudio ? document.getElementById('customAudio').src : null;
             const timerText = document.getElementById('timerText').textContent;
             const timerMatch = timerText.match(/^(.*?): (\d+) min (\d+) sec$/);
             let remaining = timerRemaining;
@@ -451,19 +618,25 @@
                 currentVideoIndex,
                 distractionCount,
                 points,
-                hasCustomAudio,
-                audioData,
                 timerMode: mode,
                 timerRemaining: remaining,
                 isFocusModeActive,
                 isSignedIn,
                 currentUser,
+                completedVideos: Array.from(completedVideos),
+                allVideosCompleted,
+                totalFocusTime,
+                totalDistractions,
+                totalVideosWatched,
                 isMinimized: document.getElementById('timerText').style.display === 'none'
             };
             localStorage.setItem('focusModeState', JSON.stringify(state));
             if (isSignedIn && currentUser) {
                 const users = JSON.parse(localStorage.getItem('users') || '{}');
                 users[currentUser].points = points;
+                users[currentUser].totalFocusTime = totalFocusTime;
+                users[currentUser].totalDistractions = totalDistractions;
+                users[currentUser].totalVideosWatched = totalVideosWatched;
                 localStorage.setItem('users', JSON.stringify(users));
             }
         }
@@ -491,34 +664,44 @@
             timerRemaining = focusDuration / 1000;
             distractionCount = 0;
             startTimer(focusDuration, timerMode);
+
             setTimeout(() => {
                 isFocusModeActive = false;
+                totalFocusTime += 50; // Add 50 minutes to total focus time
                 if (isSignedIn && distractionCount === 0) {
                     points += 100;
                     document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
                     alert('Great job! +100 points for a distraction-free session!');
                 }
+                updateAnalytics();
+                saveState();
                 timerMode = 'Break Time';
                 timerRemaining = firstBreakDuration / 1000;
                 startTimer(firstBreakDuration, timerMode);
                 alert('Break time! Enjoy 15 minutes.');
+
                 setTimeout(() => {
                     isFocusModeActive = true;
                     timerMode = 'Focus Time';
                     timerRemaining = focusDuration / 1000;
                     distractionCount = 0;
                     startTimer(focusDuration, timerMode);
+
                     setTimeout(() => {
                         isFocusModeActive = false;
+                        totalFocusTime += 50; // Add another 50 minutes
                         if (isSignedIn && distractionCount === 0) {
                             points += 100;
                             document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
                             alert('Great job! +100 points for a distraction-free session!');
                         }
+                        updateAnalytics();
+                        saveState();
                         timerMode = 'Break Time';
                         timerRemaining = secondBreakDuration / 1000;
                         startTimer(secondBreakDuration, timerMode);
                         alert('Enjoy your 10-minute break!');
+
                         setTimeout(startFocusBreakLoop, secondBreakDuration);
                     }, focusDuration);
                 }, firstBreakDuration);
@@ -536,7 +719,7 @@
                 }
                 timerRemaining--;
                 document.getElementById('timerText').textContent = `${mode}: ${Math.floor(timerRemaining / 60)} min ${timerRemaining % 60} sec`;
-                document.getElementById('progressFill').style.width = ((duration / 1000 - timerRemaining) / (duration / 1000)) * 100 + "%";
+                document.getElementById('progressFill').style.width = ((duration / 1000 - timerRemaining) / (duration / 1000)) * 100 + '%';
                 saveState();
             }, 1000);
         }
@@ -552,23 +735,36 @@
 
         function onPlayerReady(event) {
             event.target.loadVideoById(videoIds[currentVideoIndex]);
-            if (hasCustomAudio) {
-                player.setVolume(0);
-            }
         }
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
+                completedVideos.add(videoIds[currentVideoIndex]);
+                totalVideosWatched++;
+                
+                if (completedVideos.size === videoIds.length && !allVideosCompleted && isSignedIn) {
+                    points += 80;
+                    document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                    alert('Awesome! +80 points for completing all videos!');
+                    allVideosCompleted = true;
+                }
+
+                updateAnalytics();
+                saveState();
                 currentVideoIndex = (currentVideoIndex + 1) % videoIds.length;
                 player.loadVideoById(videoIds[currentVideoIndex]);
-                saveState();
             }
         }
 
+        function enterFullscreen() {
+            document.documentElement.requestFullscreen().catch(err => console.log('Fullscreen failed:', err));
+        }
+
         document.addEventListener('visibilitychange', () => {
-            const customAudio = document.getElementById('customAudio');
-            if (document.hidden && isFocusModeActive && hasCustomAudio) {
+            const focusAudio = document.getElementById('focusAudio');
+            if (document.hidden && isFocusModeActive) {
                 distractionCount++;
+                totalDistractions++;
                 if (isSignedIn) {
                     points -= 10;
                     document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
@@ -576,16 +772,15 @@
                 } else {
                     alert(`Stay focused! Distractions: ${distractionCount}`);
                 }
-                customAudio.play();
+                updateAnalytics();
+                focusAudio.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                });
                 saveState();
             } else {
-                customAudio.pause();
+                focusAudio.pause();
             }
         });
-
-        function enterFullscreen() {
-            document.documentElement.requestFullscreen().catch(err => console.log('Fullscreen failed:', err));
-        }
 
         let isDragging = false;
         let offsetX, offsetY;
@@ -633,17 +828,24 @@
             videoIds = [];
             currentVideoIndex = 0;
             distractionCount = 0;
+            completedVideos.clear();
+            allVideosCompleted = false;
             if (isSignedIn) {
-                points = JSON.parse(localStorage.getItem('users'))[currentUser].points || 0;
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                points = users[currentUser].points || 0;
+                totalFocusTime = users[currentUser].totalFocusTime || 0;
+                totalDistractions = users[currentUser].totalDistractions || 0;
+                totalVideosWatched = users[currentUser].totalVideosWatched || 0;
             } else {
                 points = 0;
+                totalFocusTime = 0;
+                totalDistractions = 0;
+                totalVideosWatched = 0;
             }
-            hasCustomAudio = false;
             isFocusModeActive = false;
             timerMode = 'Focus Time';
             timerRemaining = focusDuration / 1000;
             clearInterval(countdownInterval);
-            document.getElementById('customAudio').src = '';
             document.getElementById('inputForm').style.display = 'block';
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('signinForm').style.display = 'none';
@@ -659,6 +861,11 @@
                 player = null;
                 document.getElementById('player').innerHTML = '';
             }
+            document.getElementById('player').style.display = 'none';
+            const urlInputs = document.getElementById('urlInputs');
+            urlInputs.innerHTML = '<div class="url-container"><input type="text" class="youtube-url" placeholder="YouTube URL" required></div>';
+            updateAnalytics();
+            populatePlaylistSelect();
         }
     </script>
 </body>
