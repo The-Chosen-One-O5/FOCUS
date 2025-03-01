@@ -540,8 +540,7 @@
             lofiAudio.play();
         }
 
-        function pauseLofi()ウル
-
+        function pauseLofi() {
             lofiAudio.pause();
         }
 
@@ -549,7 +548,7 @@
             const savedState = localStorage.getItem('focusModeState');
             if (savedState) {
                 const state = JSON.parse(savedState);
-                video offscreenCanvasesvideoIds = state.videoIds || [];
+                videoIds = state.videoIds || [];
                 currentVideoIndex = state.currentVideoIndex || 0;
                 distractionCount = state.distractionCount || 0;
                 points = state.points || 0;
@@ -684,7 +683,7 @@
             const removeBtn = document.createElement('button');
             removeBtn.textContent = 'X';
             removeBtn.onclick = () => {
-                if (urlInputs.children.length > 1) url体现s.removeChild(container);
+                if (urlInputs.children.length > 1) urlInputs.removeChild(container);
             };
             container.appendChild(newInput);
             container.appendChild(removeBtn);
