@@ -140,7 +140,7 @@
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
         }
-        #secondaryTimer {
+        #clockDisplay {
             position: fixed;
             top: 80px;
             left: 10px;
@@ -150,6 +150,7 @@
             z-index: 101;
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
+            display: none;
         }
         #progressBar {
             width: 200px;
@@ -446,7 +447,7 @@
         <div id="progressBar"><div id="progressFill"></div></div>
     </div>
     <div id="pointsDisplay">Points: 0</div>
-    <div id="secondaryTimer"></div>
+    <div id="clockDisplay"></div>
     <button id="restartBtn" onclick="resetFocusMode()" style="display: none;">Restart</button>
     <div id="videoSidebar"></div>
     
@@ -479,6 +480,14 @@
 
         let isYouTubeAPILoaded = false;
 
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clockDisplay').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
         window.onload = function() {
             const savedState = localStorage.getItem('focusModeState');
             if (savedState) {
@@ -504,6 +513,7 @@
                     document.getElementById('signinForm').style.display = 'none';
                     document.getElementById('inputForm').style.display = 'block';
                     document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                    document.getElementById('clockDisplay').style.display = 'block';
                     restoreUrlInputs();
                     populatePlaylistSelect();
                     restoreTasks();
@@ -512,6 +522,7 @@
                     document.getElementById('inputForm').style.display = 'none';
                     document.getElementById('player').style.display = 'block';
                     document.getElementById('restartBtn').style.display = 'block';
+                    document.getElementById('clockDisplay').style.display = 'none';
                     populateVideoSidebar();
                     loadYouTubeAPI();
                     if (isFocusModeActive) {
@@ -525,9 +536,13 @@
                 document.getElementById('landingPage').style.display = 'block';
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'none';
+                document.getElementById('clockDisplay').style.display = 'none';
                 updateAnalytics();
                 restoreTasks();
             }
+            // Start clock updates
+            setInterval(updateClock, 1000);
+            updateClock();
         };
 
         function redirectToPYQs() {
@@ -538,6 +553,7 @@
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('signinForm').style.display = 'block';
             document.getElementById('inputForm').style.display = 'none';
+            document.getElementById('clockDisplay').style.display = 'none';
         }
 
         function signIn() {
@@ -556,6 +572,7 @@
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'block';
                 document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                document.getElementById('clockDisplay').style.display = 'block';
                 updateAnalytics();
                 saveState();
                 populatePlaylistSelect();
@@ -585,6 +602,7 @@
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'block';
                 document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
+                document.getElementById('clockDisplay').style.display = 'block';
                 updateAnalytics();
                 saveState();
                 populatePlaylistSelect();
@@ -764,6 +782,7 @@
             document.getElementById('inputForm').style.display = 'none';
             document.getElementById('player').style.display = 'block';
             document.getElementById('restartBtn').style.display = 'block';
+            document.getElementById('clockDisplay').style.display = 'none';
             populateVideoSidebar();
             loadYouTubeAPI();
             enterFullscreen();
@@ -994,14 +1013,10 @@
             countdownInterval = setInterval(() => {
                 if (timerRemaining <= 0) {
                     clearInterval(countdownInterval);
-                    document.getElementById('secondaryTimer').textContent = `${mode}: 0 min 0 sec`;
                     return;
                 }
                 timerRemaining--;
-                const minutes = Math.floor(timerRemaining / 60);
-                const seconds = timerRemaining % 60;
-                document.getElementById('timerText').textContent = `${mode}: ${minutes} min ${seconds} sec`;
-                document.getElementById('secondaryTimer').textContent = `${mode}: ${minutes} min ${seconds} sec`;
+                document.getElementById('timerText').textContent = `${mode}: ${Math.floor(timerRemaining / 60)} min ${timerRemaining % 60} sec`;
                 document.getElementById('progressFill').style.width = ((duration / 1000 - timerRemaining) / (duration / 1000)) * 100 + '%';
                 saveState();
                 updateAnalytics();
@@ -1141,12 +1156,12 @@
             document.getElementById('signinForm').style.display = 'none';
             document.getElementById('restartBtn').style.display = 'none';
             document.getElementById('timerText').textContent = '';
-            document.getElementById('secondaryTimer').textContent = '';
             document.getElementById('progressFill').style.width = '0';
             document.getElementById('progressBar').style.display = 'none';
             document.getElementById('minimizeBtn').textContent = '-';
             document.getElementById('timerText').style.display = 'block';
             document.getElementById('videoSidebar').style.right = '-320px';
+            document.getElementById('clockDisplay').style.display = 'block';
 
             // Reset URL inputs
             const urlInputs = document.getElementById('urlInputs');
