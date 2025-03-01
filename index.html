@@ -493,7 +493,7 @@
     </div>
     
     <audio id="focusAudio" preload="auto" src="https://the-chosen-one-o5.github.io/UltraFocusModeYT/focus.mp3"></audio>
-    <audio id="lofiAudio" preload="none"></audio>
+    <audio id="lofiAudio" preload="none" loop></audio>
 
     <script src="https://kit.fontawesome.com/2be1b697ca.js" crossorigin="anonymous"></script>
 
@@ -522,7 +522,7 @@
 
         let isYouTubeAPILoaded = false;
         const lofiAudio = document.getElementById('lofiAudio');
-        lofiAudio.src = "https://drive.google.com/uc?id=1gEwS7nJuUL-xp5FALgjBcaZHXIE68nn1&export=download";
+        lofiAudio.src = "https://www.dropbox.com/scl/fi/7qrgbk6vpej7x0ih7vev2/1-6_XRwBX7NX-1.mp3?rlkey=m3gntnys7az2hoq0iokkajucj&st=bmrhzjy8&dl=1";
 
         function updateClock() {
             const now = new Date();
@@ -540,7 +540,8 @@
             lofiAudio.play();
         }
 
-        function pauseLofi() {
+        function pauseLofi()ウル
+
             lofiAudio.pause();
         }
 
@@ -548,7 +549,7 @@
             const savedState = localStorage.getItem('focusModeState');
             if (savedState) {
                 const state = JSON.parse(savedState);
-                videoIds = state.videoIds || [];
+                video offscreenCanvasesvideoIds = state.videoIds || [];
                 currentVideoIndex = state.currentVideoIndex || 0;
                 distractionCount = state.distractionCount || 0;
                 points = state.points || 0;
@@ -683,7 +684,7 @@
             const removeBtn = document.createElement('button');
             removeBtn.textContent = 'X';
             removeBtn.onclick = () => {
-                if (urlInputs.children.length > 1) urlInputs.removeChild(container);
+                if (urlInputs.children.length > 1) url体现s.removeChild(container);
             };
             container.appendChild(newInput);
             container.appendChild(removeBtn);
