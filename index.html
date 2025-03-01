@@ -135,6 +135,18 @@
             left: 10px;
             color: white;
             font-size: 20px;
+            font-family: 'Poppins', sans-serif;
+            z-index: 101;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        #secondaryTimer {
+            position: fixed;
+            top: 80px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+            font-family: 'Poppins', sans-serif;
             z-index: 101;
             padding: 5px;
             background: rgba(0, 0, 0, 0.5);
@@ -225,20 +237,21 @@
         .url-container button:hover {
             background: #cc3333;
         }
-        #statsBtn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
+        #statsBtn, #todoBtn, #pyqBtn {
             padding: 8px 16px;
             font-size: 14px;
             background: #8e2de2;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 5px 10px;
         }
-        #statsBtn:hover {
+        #statsBtn:hover, #todoBtn:hover, #pyqBtn:hover {
             background: #7a25c9;
         }
-        #analytics {
+        #analytics, #todoList {
             position: absolute;
-            top: 50px;
             left: 10px;
             background: #1e1e1e;
             padding: 15px;
@@ -247,7 +260,20 @@
             display: none;
             z-index: 100;
         }
-        #analytics h3 {
+        #analytics {
+            top: 90px;
+        }
+        #todoList {
+            top: 50px;
+            width: 300px;
+            max-height: 400px;
+        }
+        #tasks {
+            overflow-y: auto;
+            max-height: 300px;
+            margin-bottom: 10px;
+        }
+        #analytics h3, #todoList h3 {
             font-size: 20px;
             margin-bottom: 10px;
             color: #8e2de2;
@@ -255,6 +281,35 @@
         #analytics p {
             font-size: 14px;
             margin: 5px 0;
+        }
+        .task-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .task-container input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .task-container input[type="text"] {
+            flex-grow: 1;
+            margin: 0;
+            max-width: none;
+        }
+        .task-container button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: #ff4444;
+            font-size: 14px;
+        }
+        .task-container button:hover {
+            background: #cc3333;
+        }
+        #todoList button:not(.task-container button) {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
         }
         @media (max-width: 800px) {
             #landingPage, #signinForm, #inputForm {
@@ -286,19 +341,43 @@
                 font-size: 14px;
                 padding: 8px 16px;
             }
-            #statsBtn {
+            #statsBtn, #todoBtn, #pyqBtn {
                 font-size: 12px;
                 padding: 6px 12px;
+                margin: 0 5px 5px;
             }
-            #analytics {
+            #analytics, #todoList {
                 top: 40px;
                 left: 5px;
                 padding: 10px;
             }
-            #analytics h3 {
+            #analytics {
+                top: 80px;
+            }
+            #todoList {
+                top: 40px;
+                width: 250px;
+                max-height: 300px;
+            }
+            #tasks {
+                max-height: 200px;
+            }
+            #analytics h3, #todoList h3 {
                 font-size: 16px;
             }
             #analytics p {
+                font-size: 12px;
+            }
+            .task-container input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+            }
+            .task-container button {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+            #todoList button:not(.task-container button) {
+                padding: 6px 12px;
                 font-size: 12px;
             }
         }
@@ -324,7 +403,21 @@
         <p>New? <button onclick="createAccount()">Create Account</button></p>
     </div>
     <div id="inputForm" style="display: none;">
+        <button id="todoBtn" onclick="toggleTodo()">To Do List</button>
         <button id="statsBtn" onclick="toggleStats()">Your Focus Stats</button>
+        <button id="pyqBtn" onclick="redirectToPYQs()">PYQs Practice</button>
+        <div id="todoList">
+            <h3>To Do List</h3>
+            <div id="tasks">
+                <div class="task-container">
+                    <input type="checkbox" class="task-check">
+                    <input type="text" class="task-text" placeholder="Enter a task">
+                    <button onclick="removeTask(this)">X</button>
+                </div>
+            </div>
+            <button onclick="addTask()">Add Task</button>
+            <button onclick="saveTasks()">Save Notes</button>
+        </div>
         <div id="analytics">
             <h3>Your Focus Stats</h3>
             <p>Total Focus Time: <span id="totalFocusTime">0</span> min</p>
@@ -353,12 +446,13 @@
         <div id="progressBar"><div id="progressFill"></div></div>
     </div>
     <div id="pointsDisplay">Points: 0</div>
-    <button id="restartBtn" onclick="resetFocusMode()">Restart</button>
+    <div id="secondaryTimer"></div>
+    <button id="restartBtn" onclick="resetFocusMode()" style="display: none;">Restart</button>
     <div id="videoSidebar"></div>
     
     <audio id="focusAudio" preload="auto" src="https://the-chosen-one-o5.github.io/UltraFocusModeYT/focus.mp3"></audio>
 
-    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/2be1b697ca.js" crossorigin="anonymous"></script>
 
     <script>
         let currentVideoIndex = 0;
@@ -377,10 +471,13 @@
         let timerRemaining = focusDuration / 1000;
         let completedVideos = new Set();
         let allVideosCompleted = false;
-        let totalFocusTime = 0; // In minutes
+        let totalFocusTime = 0;
         let totalDistractions = 0;
         let totalVideosWatched = 0;
         let playlists = JSON.parse(localStorage.getItem('playlists') || '[]');
+        let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+        let isYouTubeAPILoaded = false;
 
         window.onload = function() {
             const savedState = localStorage.getItem('focusModeState');
@@ -409,6 +506,7 @@
                     document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
                     restoreUrlInputs();
                     populatePlaylistSelect();
+                    restoreTasks();
                 }
                 if (videoIds.length > 0) {
                     document.getElementById('inputForm').style.display = 'none';
@@ -428,8 +526,13 @@
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'none';
                 updateAnalytics();
+                restoreTasks();
             }
         };
+
+        function redirectToPYQs() {
+            window.open('https://room.examgoal.com/', '_blank');
+        }
 
         function showSignIn() {
             document.getElementById('landingPage').style.display = 'none';
@@ -448,6 +551,7 @@
                 totalFocusTime = users[username].totalFocusTime || 0;
                 totalDistractions = users[username].totalDistractions || 0;
                 totalVideosWatched = users[username].totalVideosWatched || 0;
+                tasks = users[username].tasks || [];
                 document.getElementById('landingPage').style.display = 'none';
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'block';
@@ -455,6 +559,7 @@
                 updateAnalytics();
                 saveState();
                 populatePlaylistSelect();
+                restoreTasks();
             } else {
                 alert('Invalid username or password');
             }
@@ -467,7 +572,7 @@
             if (users[username]) {
                 alert('Username already exists');
             } else if (username && password) {
-                users[username] = { password, points: 0, totalFocusTime: 0, totalDistractions: 0, totalVideosWatched: 0 };
+                users[username] = { password, points: 0, totalFocusTime: 0, totalDistractions: 0, totalVideosWatched: 0, tasks: [] };
                 localStorage.setItem('users', JSON.stringify(users));
                 isSignedIn = true;
                 currentUser = username;
@@ -475,6 +580,7 @@
                 totalFocusTime = 0;
                 totalDistractions = 0;
                 totalVideosWatched = 0;
+                tasks = [];
                 document.getElementById('landingPage').style.display = 'none';
                 document.getElementById('signinForm').style.display = 'none';
                 document.getElementById('inputForm').style.display = 'block';
@@ -482,6 +588,7 @@
                 updateAnalytics();
                 saveState();
                 populatePlaylistSelect();
+                restoreTasks();
             } else {
                 alert('Please enter a username and password');
             }
@@ -540,6 +647,93 @@
             }
         }
 
+        function addTask() {
+            const tasksDiv = document.getElementById('tasks');
+            const container = document.createElement('div');
+            container.className = 'task-container';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'task-check';
+            checkbox.onchange = () => saveTasks();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'task-text';
+            input.placeholder = 'Enter a task';
+            input.onchange = () => saveTasks();
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'X';
+            removeBtn.onclick = () => removeTask(removeBtn);
+            container.appendChild(checkbox);
+            container.appendChild(input);
+            container.appendChild(removeBtn);
+            tasksDiv.appendChild(container);
+        }
+
+        function removeTask(button) {
+            const tasksDiv = document.getElementById('tasks');
+            if (tasksDiv.children.length > 1) {
+                tasksDiv.removeChild(button.parentElement);
+                saveTasks();
+            }
+        }
+
+        function restoreTasks() {
+            const tasksDiv = document.getElementById('tasks');
+            tasksDiv.innerHTML = '';
+            if (tasks.length === 0) {
+                addTask();
+            } else {
+                tasks.forEach(task => {
+                    const container = document.createElement('div');
+                    container.className = 'task-container';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'task-check';
+                    checkbox.checked = task.completed;
+                    checkbox.onchange = () => saveTasks();
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'task-text';
+                    input.value = task.text;
+                    input.onchange = () => saveTasks();
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'X';
+                    removeBtn.onclick = () => removeTask(removeBtn);
+                    container.appendChild(checkbox);
+                    container.appendChild(input);
+                    container.appendChild(removeBtn);
+                    tasksDiv.appendChild(container);
+                });
+            }
+        }
+
+        function saveTasks() {
+            const taskContainers = document.querySelectorAll('.task-container');
+            tasks = Array.from(taskContainers).map(container => {
+                const checkbox = container.querySelector('.task-check');
+                const input = container.querySelector('.task-text');
+                return {
+                    text: input.value.trim(),
+                    completed: checkbox.checked
+                };
+            }).filter(task => task.text !== '');
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            if (isSignedIn && currentUser) {
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                users[currentUser].tasks = tasks;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+        }
+
+        function toggleTodo() {
+            const todoList = document.getElementById('todoList');
+            if (todoList.style.display === 'block') {
+                todoList.style.display = 'none';
+            } else {
+                todoList.style.display = 'block';
+            }
+        }
+
         function extractVideoId(url) {
             try {
                 let videoId = null;
@@ -569,12 +763,46 @@
 
             document.getElementById('inputForm').style.display = 'none';
             document.getElementById('player').style.display = 'block';
-            enterFullscreen();
-            startFocusBreakLoop();
             document.getElementById('restartBtn').style.display = 'block';
             populateVideoSidebar();
-            saveState();
             loadYouTubeAPI();
+            enterFullscreen();
+            startFocusBreakLoop();
+            saveState();
+            
+            if (isYouTubeAPILoaded) {
+                setupYouTubePlayer();
+            } else {
+                const checkAPI = setInterval(() => {
+                    if (isYouTubeAPILoaded) {
+                        clearInterval(checkAPI);
+                        setupYouTubePlayer();
+                    }
+                }, 100);
+            }
+        }
+
+        function setupYouTubePlayer() {
+            if (player) {
+                player.destroy();
+            }
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': (event) => {
+                        console.error('YouTube Player Error:', event.data);
+                        setTimeout(() => {
+                            if (player && videoIds[currentVideoIndex]) {
+                                player.loadVideoById(videoIds[currentVideoIndex]);
+                            }
+                        }, 1000);
+                    }
+                }
+            });
         }
 
         function savePlaylist() {
@@ -592,7 +820,7 @@
                 alert('Please enter at least one valid YouTube URL to save a playlist');
                 return;
             }
-            playlists = playlists.filter(p => p.name !== playlistName); // Update if exists
+            playlists = playlists.filter(p => p.name !== playlistName);
             playlists.push({ name: playlistName, videoIds: videoIdsForPlaylist });
             localStorage.setItem('playlists', JSON.stringify(playlists));
             populatePlaylistSelect();
@@ -625,6 +853,13 @@
             if (!window.YT) {
                 const tag = document.createElement('script');
                 tag.src = "https://www.youtube.com/iframe_api";
+                tag.onload = () => {
+                    isYouTubeAPILoaded = true;
+                };
+                tag.onerror = () => {
+                    console.error('Failed to load YouTube Iframe API');
+                    alert('Failed to load YouTube API. Please check your internet connection and try again.');
+                };
                 document.body.appendChild(tag);
             }
         }
@@ -640,7 +875,7 @@
             if (analytics.style.display === 'block') {
                 analytics.style.display = 'none';
             } else {
-                updateAnalytics(); // Ensure latest stats are shown
+                updateAnalytics();
                 analytics.style.display = 'block';
             }
         }
@@ -678,6 +913,7 @@
                 users[currentUser].totalFocusTime = totalFocusTime;
                 users[currentUser].totalDistractions = totalDistractions;
                 users[currentUser].totalVideosWatched = totalVideosWatched;
+                users[currentUser].tasks = tasks;
                 localStorage.setItem('users', JSON.stringify(users));
             }
         }
@@ -708,7 +944,7 @@
 
             setTimeout(() => {
                 isFocusModeActive = false;
-                totalFocusTime += 50; // Add 50 minutes to total focus time
+                totalFocusTime += 50;
                 if (isSignedIn && distractionCount === 0) {
                     points += 100;
                     document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
@@ -730,7 +966,7 @@
 
                     setTimeout(() => {
                         isFocusModeActive = false;
-                        totalFocusTime += 50; // Add another 50 minutes
+                        totalFocusTime += 50;
                         if (isSignedIn && distractionCount === 0) {
                             points += 100;
                             document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
@@ -752,27 +988,29 @@
         function startTimer(duration, mode) {
             timerRemaining = duration / 1000;
             timerMode = mode;
-            clearInterval(countdownInterval);
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
             countdownInterval = setInterval(() => {
                 if (timerRemaining <= 0) {
                     clearInterval(countdownInterval);
+                    document.getElementById('secondaryTimer').textContent = `${mode}: 0 min 0 sec`;
                     return;
                 }
                 timerRemaining--;
-                document.getElementById('timerText').textContent = `${mode}: ${Math.floor(timerRemaining / 60)} min ${timerRemaining % 60} sec`;
+                const minutes = Math.floor(timerRemaining / 60);
+                const seconds = timerRemaining % 60;
+                document.getElementById('timerText').textContent = `${mode}: ${minutes} min ${seconds} sec`;
+                document.getElementById('secondaryTimer').textContent = `${mode}: ${minutes} min ${seconds} sec`;
                 document.getElementById('progressFill').style.width = ((duration / 1000 - timerRemaining) / (duration / 1000)) * 100 + '%';
                 saveState();
-                updateAnalytics(); // Live update during timer
+                updateAnalytics();
             }, 1000);
         }
 
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 },
-                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
-            });
+            isYouTubeAPILoaded = true;
+            setupYouTubePlayer();
         }
 
         function onPlayerReady(event) {
@@ -804,7 +1042,8 @@
 
         document.addEventListener('visibilitychange', () => {
             const focusAudio = document.getElementById('focusAudio');
-            if (document.hidden && isFocusModeActive) {
+            const playerDiv = document.getElementById('player');
+            if (document.hidden && isFocusModeActive && playerDiv.style.display === 'block') {
                 distractionCount++;
                 totalDistractions++;
                 if (isSignedIn) {
@@ -814,7 +1053,7 @@
                 } else {
                     alert(`Stay focused! Distractions: ${distractionCount}`);
                 }
-                updateAnalytics();
+                focusAudio.loop = true;
                 focusAudio.play().catch(error => {
                     console.error('Error playing audio:', error);
                 });
@@ -866,49 +1105,83 @@
         });
 
         function resetFocusMode() {
-            localStorage.removeItem('focusModeState');
+            // Stop audio
+            const focusAudio = document.getElementById('focusAudio');
+            focusAudio.pause();
+            focusAudio.currentTime = 0;
+            focusAudio.loop = false;
+
+            // Clear timer
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+
+            // Reset variables
             videoIds = [];
             currentVideoIndex = 0;
             distractionCount = 0;
             completedVideos.clear();
             allVideosCompleted = false;
-            if (isSignedIn) {
+            isFocusModeActive = false;
+            timerMode = 'Focus Time';
+            timerRemaining = focusDuration / 1000;
+
+            // Reset player
+            if (player && typeof player.destroy === 'function') {
+                player.destroy();
+                player = null;
+            }
+            document.getElementById('player').innerHTML = '';
+            document.getElementById('player').style.display = 'none';
+
+            // Reset UI
+            document.getElementById('inputForm').style.display = 'block';
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('signinForm').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'none';
+            document.getElementById('timerText').textContent = '';
+            document.getElementById('secondaryTimer').textContent = '';
+            document.getElementById('progressFill').style.width = '0';
+            document.getElementById('progressBar').style.display = 'none';
+            document.getElementById('minimizeBtn').textContent = '-';
+            document.getElementById('timerText').style.display = 'block';
+            document.getElementById('videoSidebar').style.right = '-320px';
+
+            // Reset URL inputs
+            const urlInputs = document.getElementById('urlInputs');
+            urlInputs.innerHTML = '<div class="url-container"><input type="text" class="youtube-url" placeholder="YouTube URL" required></div>';
+
+            // Reset user data
+            if (isSignedIn && currentUser) {
                 const users = JSON.parse(localStorage.getItem('users') || '{}');
                 points = users[currentUser].points || 0;
                 totalFocusTime = users[currentUser].totalFocusTime || 0;
                 totalDistractions = users[currentUser].totalDistractions || 0;
                 totalVideosWatched = users[currentUser].totalVideosWatched || 0;
+                tasks = users[currentUser].tasks || [];
             } else {
                 points = 0;
                 totalFocusTime = 0;
                 totalDistractions = 0;
                 totalVideosWatched = 0;
             }
-            isFocusModeActive = false;
-            timerMode = 'Focus Time';
-            timerRemaining = focusDuration / 1000;
-            clearInterval(countdownInterval);
-            document.getElementById('inputForm').style.display = 'block';
-            document.getElementById('landingPage').style.display = 'none';
-            document.getElementById('signinForm').style.display = 'none';
-            document.getElementById('restartBtn').style.display = 'none';
-            document.getElementById('timerText').textContent = '';
-            document.getElementById('progressFill').style.width = '0';
-            document.getElementById('progressBar').style.display = 'none';
-            document.getElementById('minimizeBtn').textContent = '-';
-            document.getElementById('timerText').style.display = 'block';
             document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
-            if (player) {
-                player.destroy();
-                player = null;
-                document.getElementById('player').innerHTML = '';
-            }
-            document.getElementById('player').style.display = 'none';
-            const urlInputs = document.getElementById('urlInputs');
-            urlInputs.innerHTML = '<div class="url-container"><input type="text" class="youtube-url" placeholder="YouTube URL" required></div>';
+
+            // Update UI elements
             updateAnalytics();
             populatePlaylistSelect();
-            document.getElementById('analytics').style.display = 'none'; // Hide stats on reset
+            restoreTasks();
+            document.getElementById('analytics').style.display = 'none';
+            document.getElementById('todoList').style.display = 'none';
+
+            // Exit fullscreen
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(err => console.error('Fullscreen exit failed:', err));
+            }
+
+            // Clear local storage state
+            localStorage.removeItem('focusModeState');
         }
     </script>
 </body>
