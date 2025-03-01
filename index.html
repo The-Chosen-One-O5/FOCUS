@@ -342,13 +342,6 @@
         #lofiPlayer button:hover {
             background: #7a25c9;
         }
-        #lofiAudioPlayer {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            width: 1px;
-            height: 1px;
-        }
         @media (max-width: 800px) {
             #landingPage, #signinForm, #inputForm {
                 max-width: 400px;
@@ -498,9 +491,9 @@
         <button id="lofiPlay" onclick="playLofi()">▶</button>
         <button id="lofiPause" onclick="pauseLofi()">❚❚</button>
     </div>
-    <div id="lofiAudioPlayer"></div>
     
     <audio id="focusAudio" preload="auto" src="https://the-chosen-one-o5.github.io/UltraFocusModeYT/focus.mp3"></audio>
+    <audio id="lofiAudio" preload="none"></audio>
 
     <script src="https://kit.fontawesome.com/2be1b697ca.js" crossorigin="anonymous"></script>
 
@@ -528,34 +521,8 @@
         let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
 
         let isYouTubeAPILoaded = false;
-        let lofiPlayer;
-
-        // Lo-Fi Playlist
-        const lofiPlaylist = [
-            'ehaHxdVMsbo',
-            'dQUA-thz0aM',
-            'h0XI5RM_ro0',
-            'eFj6BCL8pxM',
-            'rJTw_LmDS4Y',
-            'WDLy6aNfkmg',
-            'xSS0cS1Jg-w'
-        ];
-        let currentLofiIndex = 0;
-
-        function loadYouTubeAPI() {
-            if (!window.YT) {
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                tag.onload = () => {
-                    isYouTubeAPILoaded = true;
-                };
-                tag.onerror = () => {
-                    console.error('Failed to load YouTube Iframe API');
-                    alert('Failed to load YouTube API. Please check your internet connection and try again.');
-                };
-                document.body.appendChild(tag);
-            }
-        }
+        const lofiAudio = document.getElementById('lofiAudio');
+        lofiAudio.src = "https://drive.google.com/uc?id=1gEwS7nJuUL-xp5FALgjBcaZHXIE68nn1&export=download";
 
         function updateClock() {
             const now = new Date();
@@ -569,73 +536,13 @@
                 `<span class="time">${hours}:${minutes}:${seconds}</span> <span class="period">${period}</span>`;
         }
 
-        function initializeLofiPlayer() {
-            lofiPlayer = new YT.Player('lofiAudioPlayer', {
-                height: '1',
-                width: '1',
-                playerVars: {
-                    autoplay: 0, // No auto-start
-                    controls: 0, // No controls
-                    modestbranding: 1,
-                    rel: 0,
-                    showinfo: 0
-                },
-                events: {
-                    'onReady': onLofiPlayerReady,
-                    'onStateChange': onLofiPlayerStateChange,
-                    'onError': (event) => {
-                        console.error('Lo-Fi Player Error:', event.data);
-                        currentLofiIndex++;
-                        if (currentLofiIndex >= lofiPlaylist.length) currentLofiIndex = 0;
-                        lofiPlayer.loadVideoById(lofiPlaylist[currentLofiIndex]);
-                    }
-                }
-            });
-        }
-
-        function onLofiPlayerReady(event) {
-            // Player is ready, but don't play yet
-            event.target.loadVideoById(lofiPlaylist[currentLofiIndex]);
-            event.target.stopVideo(); // Ensure it doesn't start
-        }
-
-        function onLofiPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.ENDED) {
-                currentLofiIndex++;
-                if (currentLofiIndex >= lofiPlaylist.length) currentLofiIndex = 0;
-                lofiPlayer.loadVideoById(lofiPlaylist[currentLofiIndex]);
-                lofiPlayer.playVideo();
-            }
-        }
-
         function playLofi() {
-            if (!lofiPlayer) {
-                loadYouTubeAPI();
-                const checkAPI = setInterval(() => {
-                    if (isYouTubeAPILoaded) {
-                        clearInterval(checkAPI);
-                        initializeLofiPlayer();
-                        setTimeout(() => lofiPlayer.playVideo(), 500); // Delay to ensure player is ready
-                    }
-                }, 100);
-            } else {
-                lofiPlayer.playVideo();
-            }
+            lofiAudio.play();
         }
 
         function pauseLofi() {
-            if (lofiPlayer) {
-                lofiPlayer.pauseVideo();
-            }
+            lofiAudio.pause();
         }
-
-        window.onYouTubeIframeAPIReady = function() {
-            isYouTubeAPILoaded = true;
-            if (document.getElementById('player').style.display === 'block') {
-                setupYouTubePlayer();
-            }
-            // Lofi player will initialize only when play is clicked
-        };
 
         window.onload = function() {
             const savedState = localStorage.getItem('focusModeState');
@@ -956,6 +863,21 @@
             }
         }
 
+        function loadYouTubeAPI() {
+            if (!window.YT) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                tag.onload = () => {
+                    isYouTubeAPILoaded = true;
+                };
+                tag.onerror = () => {
+                    console.error('Failed to load YouTube Iframe API');
+                    alert('Failed to load YouTube API. Please check your internet connection and try again.');
+                };
+                document.body.appendChild(tag);
+            }
+        }
+
         function setupYouTubePlayer() {
             if (player) {
                 player.destroy();
@@ -977,6 +899,11 @@
                     }
                 }
             });
+        }
+
+        function onYouTubeIframeAPIReady() {
+            isYouTubeAPILoaded = true;
+            setupYouTubePlayer();
         }
 
         function savePlaylist() {
@@ -1260,11 +1187,7 @@
             focusAudio.currentTime = 0;
             focusAudio.loop = false;
             pauseLofi();
-            if (lofiPlayer && typeof lofiPlayer.destroy === 'function') {
-                lofiPlayer.destroy();
-                lofiPlayer = null;
-            }
-            currentLofiIndex = 0;
+            lofiAudio.currentTime = 0;
 
             if (countdownInterval) {
                 clearInterval(countdownInterval);
