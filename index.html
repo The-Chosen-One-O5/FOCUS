@@ -659,3 +659,20 @@
         
         const alarmSound = document.getElementById('alarm-sound');
         alarmSound.pause
+        alarmSound.pause();
+        alarmSound.currentTime = 0;
+      }
+      
+      focusModeActive = false;
+      
+      // Destroy the YouTube player
+      if (player && player.destroy) {
+        player.destroy();
+      }
+    }
+    
+    // Initialize the app when the page loads
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
