@@ -1,649 +1,661 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Focus Mode</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: #111;
-            color: white;
-            overflow: hidden;
-        }
-        
-        .home-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            padding: 20px;
-        }
-        
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 2rem;
-            text-align: center;
-            background: linear-gradient(45deg, #4cc9f0, #4361ee, #7209b7);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .input-container {
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 1rem;
-        }
-        
-        .url-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 1rem;
-            width: 100%;
-        }
-        
-        .url-input-group {
-            display: flex;
-            width: 100%;
-        }
-        
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px 0 0 5px;
-            color: white;
-            font-size: 1rem;
-        }
-        
-        .remove-url-btn {
-            background: #e63946;
-            color: white;
-            border: none;
-            padding: 0 15px;
-            cursor: pointer;
-            border-radius: 0 5px 5px 0;
-        }
-        
-        .add-url-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            transition: all 0.3s;
-        }
-        
-        .add-url-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .timer-input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .timer-input label {
-            font-size: 1rem;
-        }
-        
-        .timer-input input {
-            padding: 10px;
-            width: 80px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 1rem;
-            text-align: center;
-        }
-        
-        .start-btn {
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            background: linear-gradient(45deg, #4cc9f0, #4361ee);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.3s;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .start-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
-        }
-        
-        .focus-screen {
-            display: none;
-            position: relative;
-            height: 100vh;
-            width: 100vw;
-            background: #000;
-        }
-        
-        .video-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 2;
-        }
-        
-        .restart-btn {
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .clock {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 2;
-            font-size: 1.5rem;
-        }
-        
-        .time {
-            color: #4cc9f0;
-        }
-        
-        .ampm {
-            color: #7209b7;
-        }
-        
-        .timer {
-            position: absolute;
-            top: 45px;
-            left: 10px;
-            z-index: 2;
-            font-size: 1.2rem;
-            color: white;
-        }
-        
-        .pomodoro {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-            width: 300px;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-        }
-        
-        .pomodoro-progress {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(45deg, #4cc9f0, #4361ee);
-            border-radius: 5px;
-            transition: width 1s linear;
-        }
-        
-        .score {
-            position: absolute;
-            top: 10px;
-            right: 100px;
-            z-index: 2;
-            font-size: 1.2rem;
-        }
-        
-        .audio-player {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .play-pause-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1.5rem;
-        }
-        
-        .visualizer {
-            width: 150px;
-            height: 50px;
-            background: #1a1a2e;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .visualizer-bars {
-            display: flex;
-            height: 100%;
-            align-items: flex-end;
-            gap: 2px;
-            padding: 0 5px;
-        }
-        
-        .bar {
-            flex: 1;
-            background: linear-gradient(to top, #4cc9f0, #7209b7);
-            margin: 0 1px;
-            border-radius: 2px 2px 0 0;
-            height: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Mode YouTube Player</title>
+  <style>
+    :root {
+      --main-bg-color: #121212;
+      --text-color: #ffffff;
+      --accent-color: #3a86ff;
+      --secondary-accent: #8338ec;
+      --success-color: #06d6a0;
+      --danger-color: #ef476f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--main-bg-color);
+      color: var(--text-color);
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Home Screen */
+    #home-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: var(--accent-color);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      opacity: 0.8;
+    }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+
+    .btn:hover {
+      background-color: var(--secondary-accent);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .clock-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .light-blue-text {
+      color: #7fdbff;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .purple-text {
+      color: #8338ec;
+    }
+
+    .timer-container {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .timer-input {
+      width: 60px;
+      padding: 8px;
+      margin-right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+    }
+
+    #youtube-url-section {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: white;
+    }
+
+    #audio-player {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+    }
+
+    #audio-visualizer {
+      width: 200px;
+      height: 80px;
+      background: linear-gradient(90deg, #3a86ff, #8338ec);
+      border-radius: 5px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .player-controls {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Focus Mode Screen */
+    #focus-mode-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 1000;
+    }
+
+    #focus-header {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(0,0,0,0.7);
+      z-index: 10;
+    }
+
+    #pomodoro-timer {
+      font-size: 1.5rem;
+      color: var(--success-color);
+    }
+
+    #points-display {
+      font-size: 1.2rem;
+      color: var(--accent-color);
+    }
+
+    #restart-button {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #youtube-player {
+      width: 100%;
+      height: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Stats Section */
+    .stats-container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .stats-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: var(--accent-color);
+    }
+
+    .stat-item {
+      margin: 8px 0;
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="home-screen" id="homeScreen">
-        <h1>Ultra Focus Mode</h1>
-        <div class="input-container">
-            <div class="url-inputs" id="urlInputs">
-                <div class="url-input-group">
-                    <input type="text" placeholder="Enter YouTube URL..." class="youtube-url">
-                    <button class="remove-url-btn">×</button>
-                </div>
-            </div>
-            <button class="add-url-btn" id="addUrlBtn">+ Add another YouTube URL</button>
-        </div>
-        <div class="timer-input">
-            <label for="timerInput">Timer (minutes):</label>
-            <input type="number" id="timerInput" min="1" max="180" value="50">
-        </div>
-        <button class="start-btn" id="startBtn">Start Focus Mode</button>
+  <!-- Home Screen -->
+  <div id="home-screen">
+    <h1 class="title">Focus Mode YouTube Player</h1>
+    <p class="subtitle">Watch Videos without distraction like a GIGACHAD!</p>
+    
+    <div class="clock-container">
+      <div id="clock" class="light-blue-text">12:00 <span class="purple-text">PM</span></div>
+      <div class="timer-container">
+        <input type="number" id="timer-minutes" class="timer-input" min="1" max="180" value="50">
+        <button id="start-timer" class="btn">Set Timer</button>
+      </div>
     </div>
-
-    <div class="focus-screen" id="focusScreen">
-        <div class="video-container" id="videoContainer"></div>
-        <div class="clock">
-            <span class="time" id="clockTime">12:00</span>
-            <span class="ampm" id="clockAmPm">AM</span>
-        </div>
-        <div class="timer" id="countdownTimer">50:00</div>
-        <div class="pomodoro">
-            <div class="pomodoro-progress" id="pomodoroProgress"></div>
-        </div>
-        <div class="score" id="scoreDisplay">Score: 0</div>
-        <div class="controls">
-            <button class="restart-btn" id="restartBtn">Restart</button>
-        </div>
+    
+    <div id="youtube-url-section">
+      <h2>Enter YouTube URLs</h2>
+      <div id="url-inputs">
+        <input type="text" class="url-input youtube-url" placeholder="Paste YouTube URL here">
+      </div>
+      <button id="add-more-url" class="btn">Add Another URL</button>
+      <button id="start-focus-mode" class="btn btn-success">Start Focus Mode</button>
     </div>
-
-    <div class="audio-player">
-        <button class="play-pause-btn" id="playPauseBtn">▶</button>
-        <div class="visualizer">
-            <div class="visualizer-bars" id="visualizerBars">
-                <!-- Bars will be added dynamically -->
-            </div>
-        </div>
+    
+    <div class="stats-container">
+      <h3 class="stats-title">Your Focus Stats</h3>
+      <div class="stat-item">Total Focus Time: <span id="total-focus-time">0</span> min</div>
+      <div class="stat-item">Total Distractions: <span id="total-distractions">0</span></div>
+      <div class="stat-item">Videos Watched: <span id="videos-watched">0</span></div>
+      <div class="stat-item">Total Points: <span id="total-points">0</span></div>
     </div>
+    
+    <div id="audio-player">
+      <canvas id="audio-visualizer"></canvas>
+      <div class="player-controls">
+        <button id="play-pause" class="btn">▶️</button>
+      </div>
+      <audio id="background-music" loop>
+        <source src="https://www.dropbox.com/scl/fi/7qrgbk6vpej7x0ih7vev2/1-6_XRwBX7NX-1.mp3?rlkey=m3gntnys7az2hoq0iokkajucj&st=9ox8s9oi&dl=1" type="audio/mpeg">
+      </audio>
+      <audio id="alarm-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
+    </div>
+  </div>
+  
+  <!-- Focus Mode Screen (initially hidden) -->
+  <div id="focus-mode-screen" class="hidden">
+    <div id="focus-header">
+      <div id="focus-clock" class="light-blue-text">12:00 <span class="purple-text">PM</span></div>
+      <div id="pomodoro-timer">50:00</div>
+      <div id="points-display">Points: 0</div>
+      <button id="restart-button">Restart</button>
+    </div>
+    
+    <div id="youtube-player"></div>
+  </div>
 
-    <audio id="lofiAudio" loop>
-        <source src="https://www.dropbox.com/scl/fi/7qrgbk6vpej7x0ih7vev2/1-6_XRwBX7NX-1.mp3?rlkey=m3gntnys7az2hoq0iokkajucj&st=9ox8s9oi&dl=1" type="audio/mp3">
-    </audio>
-    <audio id="alarmAudio" loop>
-        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869.wav" type="audio/wav">
-    </audio>
-
-    <script>
-        // DOM Elements
-        const homeScreen = document.getElementById('homeScreen');
-        const focusScreen = document.getElementById('focusScreen');
-        const urlInputs = document.getElementById('urlInputs');
-        const addUrlBtn = document.getElementById('addUrlBtn');
-        const startBtn = document.getElementById('startBtn');
-        const restartBtn = document.getElementById('restartBtn');
-        const videoContainer = document.getElementById('videoContainer');
-        const clockTime = document.getElementById('clockTime');
-        const clockAmPm = document.getElementById('clockAmPm');
-        const countdownTimer = document.getElementById('countdownTimer');
-        const pomodoroProgress = document.getElementById('pomodoroProgress');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const visualizerBars = document.getElementById('visualizerBars');
-        const lofiAudio = document.getElementById('lofiAudio');
-        const alarmAudio = document.getElementById('alarmAudio');
-        const timerInput = document.getElementById('timerInput');
-
-        // State variables
-        let score = 0;
-        let videoUrls = [];
-        let currentVideoIndex = 0;
-        let pomodoroDuration = 50 * 60; // default 50 minutes in seconds
-        let remainingTime = pomodoroDuration;
-        let timerInterval;
-        let isPlaying = false;
-        let tabWasHidden = false;
-        let audioContext;
-        let analyser;
-        let dataArray;
-        let barCount = 20;
-
-        // Initialize visualizer
-        for (let i = 0; i < barCount; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-            visualizerBars.appendChild(bar);
+  <!-- YouTube API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
+  <script>
+    // Global variables
+    let player;
+    let currentVideoIndex = 0;
+    let playlist = [];
+    let pomodoroInterval;
+    let pomodoroTimeLeft = 50 * 60; // 50 minutes in seconds
+    let focusModeActive = false;
+    let points = 0;
+    let userData = {
+      points: 0,
+      focusTime: 0,
+      distractions: 0,
+      videosWatched: 0
+    };
+    let alarmLoopInterval;
+    
+    // Initialize the application
+    function init() {
+      updateClock();
+      setInterval(updateClock, 1000);
+      loadUserData();
+      setupEventListeners();
+      setupAudioVisualizer();
+    }
+    
+    // Update the clock display
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Convert 0 to 12
+      
+      document.getElementById('clock').innerHTML = 
+        `${hours}:${minutes} <span class="purple-text">${ampm}</span>`;
+      
+      if (document.getElementById('focus-clock')) {
+        document.getElementById('focus-clock').innerHTML = 
+          `${hours}:${minutes} <span class="purple-text">${ampm}</span>`;
+      }
+    }
+    
+    // Load user data from localStorage
+    function loadUserData() {
+      userData = JSON.parse(localStorage.getItem('focusModeData')) || {
+        points: 0,
+        focusTime: 0,
+        distractions: 0,
+        videosWatched: 0
+      };
+      
+      document.getElementById('total-focus-time').textContent = userData.focusTime;
+      document.getElementById('total-distractions').textContent = userData.distractions;
+      document.getElementById('videos-watched').textContent = userData.videosWatched;
+      document.getElementById('total-points').textContent = userData.points;
+      
+      points = userData.points;
+    }
+    
+    // Save user data to localStorage
+    function saveUserData() {
+      localStorage.setItem('focusModeData', JSON.stringify(userData));
+      
+      // Update stats display
+      document.getElementById('total-focus-time').textContent = userData.focusTime;
+      document.getElementById('total-distractions').textContent = userData.distractions;
+      document.getElementById('videos-watched').textContent = userData.videosWatched;
+      document.getElementById('total-points').textContent = userData.points;
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      // Add more URL button
+      document.getElementById('add-more-url').addEventListener('click', function() {
+        const urlInputs = document.getElementById('url-inputs');
+        const newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.className = 'url-input youtube-url';
+        newInput.placeholder = 'Paste YouTube URL here';
+        urlInputs.appendChild(newInput);
+      });
+      
+      // Start Focus Mode button
+      document.getElementById('start-focus-mode').addEventListener('click', startFocusMode);
+      
+      // Restart button
+      document.getElementById('restart-button').addEventListener('click', endFocusMode);
+      
+      // Play/Pause button for lofi music
+      document.getElementById('play-pause').addEventListener('click', toggleBackgroundMusic);
+      
+      // Timer button
+      document.getElementById('start-timer').addEventListener('click', function() {
+        const minutes = parseInt(document.getElementById('timer-minutes').value);
+        if (minutes > 0) {
+          alert(`Timer set for ${minutes} minutes`);
+          // Timer implementation would go here
         }
-
-        // Add URL input
-        addUrlBtn.addEventListener('click', () => {
-            const urlGroup = document.createElement('div');
-            urlGroup.className = 'url-input-group';
-            urlGroup.innerHTML = `
-                <input type="text" placeholder="Enter YouTube URL..." class="youtube-url">
-                <button class="remove-url-btn">×</button>
-            `;
-            urlInputs.appendChild(urlGroup);
-            
-            // Add event listener to new remove button
-            const removeBtn = urlGroup.querySelector('.remove-url-btn');
-            removeBtn.addEventListener('click', () => {
-                if (urlInputs.children.length > 1) {
-                    urlGroup.remove();
-                }
-            });
-        });
-
-        // Remove URL input
-        urlInputs.addEventListener('click', (e) => {
-            if (e.target.classList.contains('remove-url-btn')) {
-                if (urlInputs.children.length > 1) {
-                    e.target.parentElement.remove();
-                }
-            }
-        });
-
-        // Audio Control
-        playPauseBtn.addEventListener('click', toggleAudio);
-
-        function toggleAudio() {
-            if (isPlaying) {
-                lofiAudio.pause();
-                playPauseBtn.textContent = '▶';
-            } else {
-                if (!audioContext) {
-                    setupAudioVisualizer();
-                }
-                lofiAudio.play();
-                playPauseBtn.textContent = '⏸';
-            }
-            isPlaying = !isPlaying;
+      });
+      
+      // Tab visibility change
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden && focusModeActive) {
+          playAlarmSound();
+          deductPoints(10);
+          
+          // Update distraction count
+          userData.distractions += 1;
+          saveUserData();
         }
-
-        function setupAudioVisualizer() {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            
-            const source = audioContext.createMediaElementSource(lofiAudio);
-            source.connect(analyser);
-            analyser.connect(audioContext.destination);
-            
-            analyser.fftSize = 64;
-            const bufferLength = analyser.frequencyBinCount;
-            dataArray = new Uint8Array(bufferLength);
-            
-            updateVisualizer();
+      });
+      
+      // Key press for video switching
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'T' && focusModeActive) {
+          switchToNextVideo();
         }
-
-        function updateVisualizer() {
-            if (!audioContext) return;
-            
-            requestAnimationFrame(updateVisualizer);
-            analyser.getByteFrequencyData(dataArray);
-            
-            const bars = visualizerBars.querySelectorAll('.bar');
-            const step = Math.floor(dataArray.length / bars.length);
-            
-            for (let i = 0; i < bars.length; i++) {
-                const value = dataArray[i * step] / 255;
-                const height = Math.max(5, value * 50); // Min height 5px, max 50px
-                bars[i].style.height = `${height}px`;
-            }
+      });
+      
+      // Prevent tab closing (will show a confirmation)
+      window.addEventListener('beforeunload', function(e) {
+        if (focusModeActive) {
+          e.preventDefault();
+          e.returnValue = 'Are you sure you want to leave? You will lose points!';
+          return e.returnValue;
         }
-
-        // Clock function
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // hour '0' should be '12'
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            
-            clockTime.textContent = `${hours}:${minutes}`;
-            clockAmPm.textContent = ampm;
+      });
+    }
+    
+    // Setup audio visualizer
+    function setupAudioVisualizer() {
+      const audioElement = document.getElementById('background-music');
+      const canvas = document.getElementById('audio-visualizer');
+      const canvasCtx = canvas.getContext('2d');
+      
+      canvas.width = 200;
+      canvas.height = 80;
+      
+      // Audio context setup
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioCtx.createAnalyser();
+      const source = audioCtx.createMediaElementSource(audioElement);
+      
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      
+      // Visualization loop
+      function draw() {
+        requestAnimationFrame(draw);
+        
+        if (audioElement.paused) {
+          canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+          return;
         }
-
-        // Timer function
-        function startTimer(duration) {
-            clearInterval(timerInterval);
-            remainingTime = duration;
-            updateTimerDisplay();
-            
-            timerInterval = setInterval(() => {
-                remainingTime--;
-                updateTimerDisplay();
-                updatePomodoroProgress();
-                
-                if (remainingTime <= 0) {
-                    clearInterval(timerInterval);
-                    completePomodoro();
-                }
-            }, 1000);
+        
+        analyser.getByteFrequencyData(dataArray);
+        
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let barHeight;
+        let x = 0;
+        
+        for(let i = 0; i < bufferLength; i++) {
+          barHeight = dataArray[i] / 2;
+          
+          // Create gradient from blue to purple
+          const gradient = canvasCtx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+          gradient.addColorStop(0, '#3a86ff');
+          gradient.addColorStop(1, '#8338ec');
+          
+          canvasCtx.fillStyle = gradient;
+          canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+          
+          x += barWidth + 1;
         }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            countdownTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
+      
+      draw();
+    }
+    
+    // Toggle background music
+    function toggleBackgroundMusic() {
+      const audioElement = document.getElementById('background-music');
+      const playPauseButton = document.getElementById('play-pause');
+      
+      if (audioElement.paused) {
+        audioElement.play();
+        playPauseButton.textContent = '❚❚';
+      } else {
+        audioElement.pause();
+        playPauseButton.textContent = '▶️';
+      }
+    }
+    
+    // Play alarm sound
+    function playAlarmSound() {
+      const alarmSound = document.getElementById('alarm-sound');
+      
+      // Clear any existing alarm loops
+      if (alarmLoopInterval) {
+        clearInterval(alarmLoopInterval);
+        alarmLoopInterval = null;
+      }
+      
+      // Loop the alarm sound
+      alarmSound.play();
+      alarmLoopInterval = setInterval(() => {
+        alarmSound.currentTime = 0;
+        alarmSound.play();
+      }, 2000); // Loop every 2 seconds
+      
+      // Stop alarm when tab gets focus again
+      document.addEventListener('visibilitychange', function stopAlarm() {
+        if (!document.hidden && alarmLoopInterval) {
+          clearInterval(alarmLoopInterval);
+          alarmLoopInterval = null;
+          alarmSound.pause();
+          alarmSound.currentTime = 0;
+          document.removeEventListener('visibilitychange', stopAlarm);
         }
-
-        function updatePomodoroProgress() {
-            const progressPercentage = ((pomodoroDuration - remainingTime) / pomodoroDuration) * 100;
-            pomodoroProgress.style.width = `${progressPercentage}%`;
+      });
+    }
+    
+    // Deduct points
+    function deductPoints(amount) {
+      points -= amount;
+      userData.points -= amount;
+      document.getElementById('points-display').textContent = `Points: ${points}`;
+      saveUserData();
+    }
+    
+    // Add points
+    function addPoints(amount) {
+      points += amount;
+      userData.points += amount;
+      document.getElementById('points-display').textContent = `Points: ${points}`;
+      saveUserData();
+    }
+    
+    // Start Focus Mode
+    function startFocusMode() {
+      const urls = Array.from(document.querySelectorAll('.youtube-url'))
+        .map(input => input.value)
+        .filter(url => url.trim() !== '');
+      
+      if (urls.length === 0) {
+        alert('Please enter at least one YouTube URL');
+        return;
+      }
+      
+      playlist = urls.map(url => {
+        // Extract video ID from URL
+        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+        const match = url.match(regex);
+        return match ? match[1] : url;
+      });
+      
+      document.getElementById('home-screen').classList.add('hidden');
+      document.getElementById('focus-mode-screen').classList.remove('hidden');
+      
+      // Initialize the YouTube player
+      if (typeof YT !== 'undefined' && YT.loaded) {
+        createYouTubePlayer();
+      } else {
+        // Wait for YouTube API to load
+        window.onYouTubeIframeAPIReady = createYouTubePlayer;
+      }
+      
+      focusModeActive = true;
+      startPomodoroTimer();
+      
+      // Set initial points display
+      document.getElementById('points-display').textContent = `Points: ${points}`;
+      
+      // Track this video as watched
+      userData.videosWatched += 1;
+      saveUserData();
+    }
+    
+    // Create YouTube Player
+    function createYouTubePlayer() {
+      player = new YT.Player('youtube-player', {
+        height: '100%',
+        width: '100%',
+        videoId: playlist[0],
+        playerVars: {
+          'autoplay': 1,
+          'controls': 1,
+          'rel': 0,
+          'fs': 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
         }
-
-        function completePomodoro() {
-            score += 80;
-            updateScore();
-            alert('Pomodoro completed! +80 points');
+      });
+    }
+    
+    // When YouTube player is ready
+    function onPlayerReady(event) {
+      event.target.playVideo();
+    }
+    
+    // When YouTube player state changes
+    function onPlayerStateChange(event) {
+      // When video ends, go to next video
+      if (event.data === YT.PlayerState.ENDED) {
+        switchToNextVideo();
+      }
+    }
+    
+    // Switch to next video
+    function switchToNextVideo() {
+      currentVideoIndex = (currentVideoIndex + 1) % playlist.length;
+      player.loadVideoById(playlist[currentVideoIndex]);
+      
+      // Track this video as watched
+      userData.videosWatched += 1;
+      saveUserData();
+    }
+    
+    // Start Pomodoro Timer
+    function startPomodoroTimer() {
+      pomodoroTimeLeft = 50 * 60; // 50 minutes in seconds
+      updatePomodoroDisplay();
+      
+      pomodoroInterval = setInterval(() => {
+        pomodoroTimeLeft--;
+        updatePomodoroDisplay();
+        
+        if (pomodoroTimeLeft <= 0) {
+          // Pomodoro completed
+          clearInterval(pomodoroInterval);
+          
+          // Add points for completion
+          addPoints(80);
+          
+          // Add to total focus time
+          userData.focusTime += 50;
+          saveUserData();
+          
+          alert('Congratulations! You completed a 50-minute focus session and earned 80 points!');
         }
-
-        function updateScore() {
-            scoreDisplay.textContent = `Score: ${score}`;
-            saveScore();
-        }
-
-        // Tab visibility change detection
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && focusScreen.style.display === 'block') {
-                // User switched tabs during focus mode
-                tabWasHidden = true;
-                alarmAudio.play();
-                score -= 10;
-                updateScore();
-            } else if (document.visibilityState === 'visible' && tabWasHidden) {
-                // User came back to the tab
-                tabWasHidden = false;
-                alarmAudio.pause();
-                alarmAudio.currentTime = 0;
-            }
-        });
-
-        // Local storage functions
-        function saveScore() {
-            localStorage.setItem('focusModeScore', score);
-        }
-
-        function loadScore() {
-            const savedScore = localStorage.getItem('focusModeScore');
-            if (savedScore !== null) {
-                score = parseInt(savedScore);
-                updateScore();
-            }
-        }
-
-        function saveVideoUrls() {
-            localStorage.setItem('focusModeUrls', JSON.stringify(videoUrls));
-        }
-
-        function loadVideoUrls() {
-            const savedUrls = localStorage.getItem('focusModeUrls');
-            if (savedUrls) {
-                videoUrls = JSON.parse(savedUrls);
-                
-                // Clear existing inputs
-                while (urlInputs.firstChild) {
-                    urlInputs.removeChild(urlInputs.firstChild);
-                }
-                
-                // Create inputs for each saved URL
-                videoUrls.forEach(url => {
-                    const urlGroup = document.createElement('div');
-                    urlGroup.className = 'url-input-group';
-                    urlGroup.innerHTML = `
-                        <input type="text" placeholder="Enter YouTube URL..." class="youtube-url" value="${url}">
-                        <button class="remove-url-btn">×</button>
-                    `;
-                    urlInputs.appendChild(urlGroup);
-                });
-                
-                // If no URLs were loaded, add one empty input
-                if (videoUrls.length === 0) {
-                    addUrlBtn.click();
-                }
-            }
-        }
-
-        // YouTube URL to Embed URL conversion
-        function getYouTubeEmbedUrl(url) {
-            let videoId = '';
-            
-            // Regular YouTube URL format
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            
-            if (match && match[2].length === 11) {
-                videoId = match[2];
-            } else {
-                // Not a valid YouTube URL, return as is (error will be handled elsewhere)
-                return url;
-            }
-            
-            return `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-        }
-
-        // Start focus mode
-        startBtn.addEventListener('click', () => {
-            // Collect all YouTube URLs
-            videoUrls = [];
-            const urlInputElements = document.querySelectorAll('.youtube-url');
-            urlInputElements.forEach(input => {
-                if (input.value.trim() !== '') {
-                    videoUrls.push(input.value);
-                }
-            });
-            
-            if (videoUrls.length === 0) {
-                alert('Please enter at least one YouTube URL');
-                return;
-            }
-            
-            // Save URLs to local storage
-            saveVideoUrls();
-            
-            // Get timer duration
-            pomodoroDuration = parseInt(timerInput.value) * 60;
-            
-            // Switch to focus mode
-            homeScreen.style.display = 'none';
-            focusScreen.style.display = 'block';
-            
-            // Embed the first video
-            loadVideo(0);
-            
-            // Start the timer
-            startTimer(pomodoroDuration);
-            
-            // Start the clock
-            updateClock();
-            setInterval(updateClock, 60000); // Update every minute
-            
-            // If audio was playing on home screen, keep it playing
-            if (isPlaying) {
-                lofiAudio.play();
-            }
-        });
-
-        // Load a video by index
-        function loadVideo(index) {
-            if (index >= 0 && index < videoUrls.length) {
-                currentVideoIndex = index;
-                const embedUrl = getYouTubeEmbedUrl(videoUrls[index]);
-                videoContainer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-            }
-        }
-
-        // Switch videos with 'T' key
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 't' && focusScreen.style.display === 'block') {
-                currentVideoIndex = (currentVideoIndex + 1) % videoUrls.length;
-                loadVideo(currentVideoIndex);
-            }
-        });
-
-        // Restart button
-        restartBtn.addEventListener('click', () => {
-            // Stop timer
-            clearInterval(timerInterval);
-            
-            // Switch back to home screen
-            focusScreen.style.display = 'none';
-            homeScreen.style.display = 'flex';
-            
-            // Stop any videos
-            videoContainer.innerHTML = '';
-        });
-
-        // Load saved data on page load
-        window.addEventListener('load', () => {
-            loadScore();
-            loadVideoUrls();
-        });
-    </script>
-</body>
-</html>
+      }, 1000);
+    }
+    
+    // Update Pomodoro Timer Display
+    function updatePomodoroDisplay() {
+      const minutes = Math.floor(pomodoroTimeLeft / 60);
+      const seconds = pomodoroTimeLeft % 60;
+      
+      document.getElementById('pomodoro-timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // End Focus Mode
+    function endFocusMode() {
+      document.getElementById('focus-mode-screen').classList.add('hidden');
+      document.getElementById('home-screen').classList.remove('hidden');
+      
+      // Stop pomodoro timer
+      if (pomodoroInterval) {
+        clearInterval(pomodoroInterval);
+      }
+      
+      // Stop any alarm sounds
+      if (alarmLoopInterval) {
+        clearInterval(alarmLoopInterval);
+        alarmLoopInterval = null;
+        
+        const alarmSound = document.getElementById('alarm-sound');
+        alarmSound.pause
