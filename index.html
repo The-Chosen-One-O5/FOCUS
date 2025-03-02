@@ -576,14 +576,17 @@
     <button id="restartBtn" onclick="resetFocusMode()" style="display: none;">Restart</button>
     <div id="videoSidebar"></div>
     <div id="lofiPlayer">
+        <!-- Audio Visualizer -->
         <canvas id="audioVisualizer" width="150" height="30"></canvas>
         <button id="lofiPlay" onclick="playLofi()">▶</button>
         <button id="lofiPause" onclick="pauseLofi()">❚❚</button>
     </div>
     <audio id="focusAudio" preload="auto" src="https://the-chosen-one-o5.github.io/UltraFocusModeYT/focus.mp3"></audio>
     <audio id="lofiAudio" preload="none" loop></audio>
+
     <script src="https://kit.fontawesome.com/2be1b697ca.js" crossorigin="anonymous"></script>
     <script>
+        // State variables
         let currentVideoIndex = 0;
         let player = null;
         let videoIds = [];
@@ -593,25 +596,42 @@
         let points = 0;
         let isSignedIn = false;
         let currentUser = null;
-        const focusDuration = 50 * 60 * 1000;
-        const firstBreakDuration = 15 * 60 * 1000;
-        const secondBreakDuration = 10 * 60 * 1000;
         let timerMode = 'Focus Time';
-        let timerRemaining = focusDuration / 1000;
+        let timerRemaining = 0;
         let completedVideos = new Set();
         let allVideosCompleted = false;
         let totalFocusTime = 0;
         let totalDistractions = 0;
         let totalVideosWatched = 0;
-        let playlists = JSON.parse(localStorage.getItem('playlists') || '[]');
-        let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        let playlists = [];
+        let tasks = [];
         let isYouTubeAPILoaded = false;
-        const lofiAudio = document.getElementById('lofiAudio');
-        lofiAudio.src = "https://www.dropbox.com/scl/fi/7qrgbk6vpej7x0ih7vev2/1-6_XRwBX7NX-1.mp3?rlkey=m3gntnys7az2hoq0iokkajucj&st=bmrhzjy8&dl=1";
+
+        // Default durations
+        const FOCUS_DURATION_DEFAULT = 50 * 60 * 1000; // 50 minutes
+        const FIRST_BREAK_DURATION = 15 * 60 * 1000;   // 15 minutes
+        const SECOND_BREAK_DURATION = 10 * 60 * 1000;  // 10 minutes
+
+        // Custom Pomodoro durations (will be set dynamically)
+        let focusDuration = FOCUS_DURATION_DEFAULT;
+        let breakDuration = FIRST_BREAK_DURATION;
 
         // Audio visualizer variables
         let audioContext, analyser, dataArray;
+        const lofiAudio = document.getElementById('lofiAudio');
+        lofiAudio.src = "https://www.dropbox.com/scl/fi/7qrgbk6vpej7x0ih7vev2/1-6_XRwBX7NX-1.mp3?rlkey=m3gntnys7az2hoq0iokkajucj&st=bmrhzjy8&dl=1";
 
+        // Initialize state from localStorage
+        try {
+            playlists = JSON.parse(localStorage.getItem('playlists') || '[]');
+            tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        } catch (error) {
+            console.error('Error initializing state from localStorage:', error);
+            playlists = [];
+            tasks = [];
+        }
+
+        // Update clock display
         function updateClock() {
             try {
                 const now = new Date();
@@ -627,6 +647,7 @@
             }
         }
 
+        // Setup audio visualizer for Lo-Fi player
         function setupAudioVisualizer() {
             try {
                 if (!audioContext) {
@@ -650,6 +671,7 @@
                 const ctx = canvas.getContext('2d');
                 const width = canvas.width;
                 const height = canvas.height;
+
                 function draw() {
                     requestAnimationFrame(draw);
                     if (lofiAudio.paused) {
@@ -661,7 +683,7 @@
                     const barWidth = width / dataArray.length;
                     let x = 0;
                     for (let i = 0; i < dataArray.length; i++) {
-                        const barHeight = dataArray[i] / 255 * height;
+                        const barHeight = (dataArray[i] / 255) * height;
                         const gradient = ctx.createLinearGradient(0, 0, 0, height);
                         gradient.addColorStop(0, '#8e2de2');
                         gradient.addColorStop(1, '#4a00e0');
@@ -693,6 +715,7 @@
             }
         }
 
+        // Window onload to initialize the app
         window.onload = function() {
             try {
                 console.log('Window onload started');
@@ -1043,6 +1066,10 @@
                     return;
                 }
 
+                // Use default durations for standard focus mode
+                focusDuration = FOCUS_DURATION_DEFAULT;
+                breakDuration = FIRST_BREAK_DURATION;
+
                 document.getElementById('inputForm').style.display = 'none';
                 document.getElementById('player').style.display = 'block';
                 document.getElementById('restartBtn').style.display = 'block';
@@ -1056,16 +1083,15 @@
                 saveState();
 
                 // Ensure the video plays after API is loaded
-                const apiLoadTimeout = setTimeout(() => {
-                    if (!isYouTubeAPILoaded) {
-                        clearInterval(checkAPI);
-                        alert('Failed to load YouTube API. Please refresh the page and try again.');
-                    }
-                }, 10000); // 10-second timeout
-
                 if (isYouTubeAPILoaded) {
                     setupYouTubePlayer();
                 } else {
+                    const apiLoadTimeout = setTimeout(() => {
+                        if (!isYouTubeAPILoaded) {
+                            clearInterval(checkAPI);
+                            alert('Failed to load YouTube API. Please refresh the page.');
+                        }
+                    }, 10000); // 10-second timeout
                     const checkAPI = setInterval(() => {
                         if (isYouTubeAPILoaded) {
                             clearInterval(checkAPI);
@@ -1104,11 +1130,7 @@
         function setupYouTubePlayer() {
             try {
                 if (player) {
-                    try {
-                        player.destroy();
-                    } catch (destroyError) {
-                        console.error('Error destroying existing player:', destroyError);
-                    }
+                    player.destroy();
                     player = null;
                 }
                 player = new YT.Player('player', {
@@ -1130,13 +1152,7 @@
                 });
             } catch (error) {
                 console.error('Error in setupYouTubePlayer:', error);
-                alert('Failed to initialize YouTube player. Please try again.');
             }
-        }
-
-        function onYouTubeIframeAPIReady() {
-            isYouTubeAPILoaded = true;
-            setupYouTubePlayer();
         }
 
         function savePlaylist() {
@@ -1222,13 +1238,16 @@
         function saveState() {
             try {
                 const timerText = document.getElementById('timerText').textContent;
-                const timerMatch = timerText.match(/^(.*?): (\d+) min (\d+) sec$/);
                 let remaining = timerRemaining;
                 let mode = timerMode;
+
+                // Fix the timerMatch parsing logic
+                const timerMatch = timerText.match(/^(.*?): (\d+) min (\d+) sec$/);
                 if (timerMatch) {
-                    mode = timerMatch[1];
-                    remaining = (parseInt(timerMatch[2]) * 60) + parseInt(timerMatch[3]);
+                    mode = timerMatch[1]; // e.g., "Focus Time"
+                    remaining = (parseInt(timerMatch[2]) * 60) + parseInt(timerMatch[3]); // Convert to seconds
                 }
+
                 const state = {
                     videoIds,
                     currentVideoIndex,
@@ -1247,6 +1266,7 @@
                     isMinimized: document.getElementById('timerText').style.display === 'none'
                 };
                 localStorage.setItem('focusModeState', JSON.stringify(state));
+
                 if (isSignedIn && currentUser) {
                     const users = JSON.parse(localStorage.getItem('users') || '{}');
                     users[currentUser].points = points;
@@ -1296,7 +1316,7 @@
 
                 setTimeout(() => {
                     isFocusModeActive = false;
-                    totalFocusTime += 50;
+                    totalFocusTime += Math.round(focusDuration / (60 * 1000)); // Convert to minutes
                     if (isSignedIn && distractionCount === 0) {
                         points += 100;
                         document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
@@ -1305,11 +1325,12 @@
                     updateAnalytics();
                     saveState();
                     timerMode = 'Break Time';
-                    timerRemaining = firstBreakDuration / 1000;
-                    startTimer(firstBreakDuration, timerMode);
-                    alert('Break time! Enjoy 15 minutes.');
+                    timerRemaining = breakDuration / 1000;
+                    startTimer(breakDuration, timerMode);
+                    alert(`Break time! Enjoy ${Math.round(breakDuration / (60 * 1000))} minutes.`);
 
                     setTimeout(() => {
+                        // Second focus session
                         isFocusModeActive = true;
                         timerMode = 'Focus Time';
                         timerRemaining = focusDuration / 1000;
@@ -1318,7 +1339,7 @@
 
                         setTimeout(() => {
                             isFocusModeActive = false;
-                            totalFocusTime += 50;
+                            totalFocusTime += Math.round(focusDuration / (60 * 1000));
                             if (isSignedIn && distractionCount === 0) {
                                 points += 100;
                                 document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
@@ -1327,13 +1348,13 @@
                             updateAnalytics();
                             saveState();
                             timerMode = 'Break Time';
-                            timerRemaining = secondBreakDuration / 1000;
-                            startTimer(secondBreakDuration, timerMode);
+                            timerRemaining = SECOND_BREAK_DURATION / 1000;
+                            startTimer(SECOND_BREAK_DURATION, timerMode);
                             alert('Enjoy your 10-minute break!');
 
-                            setTimeout(startFocusBreakLoop, secondBreakDuration);
+                            setTimeout(startFocusBreakLoop, SECOND_BREAK_DURATION);
                         }, focusDuration);
-                    }, firstBreakDuration);
+                    }, breakDuration);
                 }, focusDuration);
             } catch (error) {
                 console.error('Error in startFocusBreakLoop:', error);
@@ -1345,8 +1366,10 @@
             try {
                 const focusMin = parseInt(document.getElementById('focusMinutes').value) || 25;
                 const breakMin = parseInt(document.getElementById('breakMinutes').value) || 5;
-                const customFocusDuration = focusMin * 60 * 1000;
-                const customBreakDuration = breakMin * 60 * 1000;
+
+                // Set custom durations for the focus-break loop
+                focusDuration = focusMin * 60 * 1000;
+                breakDuration = breakMin * 60 * 1000;
 
                 const urlInputs = document.querySelectorAll('.youtube-url');
                 const urls = Array.from(urlInputs)
@@ -1359,6 +1382,7 @@
                     return;
                 }
 
+                // Start with these custom durations
                 document.getElementById('inputForm').style.display = 'none';
                 document.getElementById('player').style.display = 'block';
                 document.getElementById('restartBtn').style.display = 'block';
@@ -1368,46 +1392,18 @@
                 populateVideoSidebar();
                 loadYouTubeAPI();
                 enterFullscreen();
-
-                function customFocusBreakLoop() {
-                    isFocusModeActive = true;
-                    timerMode = 'Focus Time';
-                    timerRemaining = customFocusDuration / 1000;
-                    distractionCount = 0;
-                    startTimer(customFocusDuration, timerMode);
-
-                    setTimeout(() => {
-                        isFocusModeActive = false;
-                        totalFocusTime += focusMin;
-                        if (isSignedIn && distractionCount === 0) {
-                            points += 100;
-                            document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
-                            alert('Great job! +100 points for a distraction-free session!');
-                        }
-                        updateAnalytics();
-                        saveState();
-                        timerMode = 'Break Time';
-                        timerRemaining = customBreakDuration / 1000;
-                        startTimer(customBreakDuration, timerMode);
-                        alert(`Break time! Enjoy ${breakMin} minutes.`);
-
-                        setTimeout(customFocusBreakLoop, customBreakDuration);
-                    }, customFocusDuration);
-                }
-
-                customFocusBreakLoop();
+                startFocusBreakLoop();
                 saveState();
-
-                const apiLoadTimeout = setTimeout(() => {
-                    if (!isYouTubeAPILoaded) {
-                        clearInterval(checkAPI);
-                        alert('Failed to load YouTube API. Please refresh the page and try again.');
-                    }
-                }, 10000);
 
                 if (isYouTubeAPILoaded) {
                     setupYouTubePlayer();
                 } else {
+                    const apiLoadTimeout = setTimeout(() => {
+                        if (!isYouTubeAPILoaded) {
+                            clearInterval(checkAPI);
+                            alert('Failed to load YouTube API. Please refresh the page.');
+                        }
+                    }, 10000);
                     const checkAPI = setInterval(() => {
                         if (isYouTubeAPILoaded) {
                             clearInterval(checkAPI);
@@ -1432,6 +1428,7 @@
                 countdownInterval = setInterval(() => {
                     if (timerRemaining <= 0) {
                         clearInterval(countdownInterval);
+                        countdownInterval = null;
                         return;
                     }
                     timerRemaining--;
@@ -1443,6 +1440,11 @@
             } catch (error) {
                 console.error('Error in startTimer:', error);
             }
+        }
+
+        function onYouTubeIframeAPIReady() {
+            isYouTubeAPILoaded = true;
+            setupYouTubePlayer();
         }
 
         function onPlayerReady(event) {
@@ -1458,12 +1460,14 @@
                 if (event.data === YT.PlayerState.ENDED) {
                     completedVideos.add(videoIds[currentVideoIndex]);
                     totalVideosWatched++;
+                    
                     if (completedVideos.size === videoIds.length && !allVideosCompleted && isSignedIn) {
                         points += 80;
                         document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
                         alert('Awesome! +80 points for completing all videos!');
                         allVideosCompleted = true;
                     }
+
                     updateAnalytics();
                     saveState();
                     currentVideoIndex = (currentVideoIndex + 1) % videoIds.length;
@@ -1560,31 +1564,36 @@
 
         function resetFocusMode() {
             try {
-                console.log('Starting resetFocusMode...');
+                console.log('Resetting focus mode...');
 
                 // Step 1: Stop and reset audio
-                console.log('Stopping focus audio...');
+                console.log('Stopping audio...');
                 const focusAudio = document.getElementById('focusAudio');
                 if (focusAudio) {
                     focusAudio.pause();
                     focusAudio.currentTime = 0;
                     focusAudio.loop = false;
+                } else {
+                    console.warn('focusAudio element not found');
                 }
 
-                console.log('Stopping lofi audio...');
+                // Step 2: Stop and reset Lo-Fi audio
+                console.log('Stopping Lo-Fi audio...');
                 pauseLofi();
                 if (lofiAudio) {
                     lofiAudio.currentTime = 0;
+                } else {
+                    console.warn('lofiAudio element not found');
                 }
 
-                // Step 2: Stop any running timers
+                // Step 3: Stop any running timers
                 console.log('Stopping timers...');
                 if (countdownInterval) {
                     clearInterval(countdownInterval);
                     countdownInterval = null;
                 }
 
-                // Step 3: Reset state variables
+                // Step 4: Reset state variables
                 console.log('Resetting state variables...');
                 videoIds = [];
                 currentVideoIndex = 0;
@@ -1593,50 +1602,11 @@
                 allVideosCompleted = false;
                 isFocusModeActive = false;
                 timerMode = 'Focus Time';
-                timerRemaining = focusDuration / 1000;
+                timerRemaining = FOCUS_DURATION_DEFAULT / 1000; // Reset to default
+                focusDuration = FOCUS_DURATION_DEFAULT;
+                breakDuration = FIRST_BREAK_DURATION;
 
-                // Step 4: Destroy the YouTube player
-                console.log('Destroying YouTube player...');
-                if (player && typeof player.destroy === 'function') {
-                    try {
-                        player.destroy();
-                    } catch (destroyError) {
-                        console.error('Error destroying YouTube player:', destroyError);
-                    }
-                    player = null;
-                }
-
-                // Step 5: Reset player UI
-                console.log('Resetting player UI...');
-                const playerDiv = document.getElementById('player');
-                if (playerDiv) {
-                    playerDiv.innerHTML = '';
-                    playerDiv.style.display = 'none';
-                }
-
-                // Step 6: Show input form and hide other sections
-                console.log('Showing input form...');
-                document.getElementById('inputForm').style.display = 'block';
-                document.getElementById('landingPage').style.display = 'none';
-                document.getElementById('signinForm').style.display = 'none';
-                document.getElementById('restartBtn').style.display = 'none';
-                document.getElementById('timerText').textContent = '';
-                document.getElementById('progressFill').style.width = '0';
-                document.getElementById('progressBar').style.display = 'none';
-                document.getElementById('minimizeBtn').textContent = '-';
-                document.getElementById('timerText').style.display = 'block';
-                document.getElementById('videoSidebar').style.right = '-320px';
-                document.getElementById('clockDisplay').style.display = 'block';
-                document.getElementById('lofiPlayer').style.display = 'block';
-
-                // Step 7: Reset URL inputs
-                console.log('Resetting URL inputs...');
-                const urlInputs = document.getElementById('urlInputs');
-                if (urlInputs) {
-                    urlInputs.innerHTML = '<div class="url-container"><input type="text" class="youtube-url" placeholder="YouTube URL" required></div>';
-                }
-
-                // Step 8: Reset user data
+                // Step 5: Reset user data if signed in
                 console.log('Resetting user data...');
                 if (isSignedIn && currentUser) {
                     const users = JSON.parse(localStorage.getItem('users') || '{}');
@@ -1650,18 +1620,61 @@
                     totalFocusTime = 0;
                     totalDistractions = 0;
                     totalVideosWatched = 0;
+                    tasks = [];
                 }
+
+                // Step 6: Destroy the YouTube player
+                console.log('Destroying YouTube player...');
+                if (player && typeof player.destroy === 'function') {
+                    try {
+                        player.destroy();
+                    } catch (destroyError) {
+                        console.error('Error destroying YouTube player:', destroyError);
+                    }
+                    player = null;
+                }
+                const playerDiv = document.getElementById('player');
+                if (playerDiv) {
+                    playerDiv.innerHTML = '';
+                    playerDiv.style.display = 'none';
+                }
+
+                // Step 7: Reset UI elements
+                console.log('Resetting UI elements...');
+                document.getElementById('inputForm').style.display = 'block';
+                document.getElementById('landingPage').style.display = 'none';
+                document.getElementById('signinForm').style.display = 'none';
+                document.getElementById('restartBtn').style.display = 'none';
+                document.getElementById('timerText').textContent = '';
+                document.getElementById('progressFill').style.width = '0';
+                document.getElementById('progressBar').style.display = 'none';
+                document.getElementById('minimizeBtn').textContent = '-';
+                document.getElementById('timerText').style.display = 'block';
+                document.getElementById('videoSidebar').style.right = '-320px';
+                document.getElementById('clockDisplay').style.display = 'block';
+                document.getElementById('lofiPlayer').style.display = 'block';
                 document.getElementById('pointsDisplay').textContent = `Points: ${points}`;
 
-                // Step 9: Update UI elements
-                console.log('Updating UI elements...');
+                // Step 8: Reset URL inputs
+                console.log('Resetting URL inputs...');
+                const urlInputs = document.getElementById('urlInputs');
+                if (urlInputs) {
+                    urlInputs.innerHTML = '<div class="url-container"><input type="text" class="youtube-url" placeholder="YouTube URL" required></div>';
+                }
+
+                // Step 9: Update analytics and other UI elements
+                console.log('Updating analytics and UI...');
                 updateAnalytics();
                 populatePlaylistSelect();
                 restoreTasks();
                 document.getElementById('analytics').style.display = 'none';
                 document.getElementById('todoList').style.display = 'none';
 
-                // Step 10: Exit fullscreen
+                // Step 10: Clear local storage
+                console.log('Clearing local storage...');
+                localStorage.removeItem('focusModeState');
+
+                // Step 11: Exit fullscreen if active
                 console.log('Exiting fullscreen...');
                 if (document.fullscreenElement) {
                     try {
@@ -1675,11 +1688,7 @@
                     }
                 }
 
-                // Step 11: Clear local storage
-                console.log('Clearing local storage...');
-                localStorage.removeItem('focusModeState');
-
-                console.log('resetFocusMode completed successfully');
+                console.log('Reset completed successfully');
             } catch (error) {
                 console.error('Error in resetFocusMode:', error);
                 alert('An error occurred while resetting. Please refresh the page.');
