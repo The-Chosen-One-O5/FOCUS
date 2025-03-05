@@ -1,678 +1,845 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Focus Mode YouTube Player</title>
-  <style>
-    :root {
-      --main-bg-color: #121212;
-      --text-color: #ffffff;
-      --accent-color: #3a86ff;
-      --secondary-accent: #8338ec;
-      --success-color: #06d6a0;
-      --danger-color: #ef476f;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Quest - Gamified Productivity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --accent-color: #FFD700;
+            --light-text: #E0E0E0;
+            --delete-color: #D32F2F;
+            --task-bg: rgba(50, 60, 50, 0.9);
+            --transition-time: 0.4s;
+            --dark-bg: #1C2526;
+            --dark-container: rgba(40, 50, 40, 0.95);
+            --dark-input-bg: #2A3439;
+            --overlay: rgba(0, 0, 0, 0.5);
+            --graph-bg: #263238;
+            --glow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
 
-    body {
-      background-color: var(--main-bg-color);
-      color: var(--text-color);
-      font-family: 'Poppins', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-    }
+        body {
+            background: url('https://assets.grok.com/users/61aa03d5-34a6-451f-a29b-c678af050623/7qqe1265AFQU0oyA-generated_image.jpg') no-repeat center/cover fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            position: relative;
+            overflow-x: hidden;
+            transition: background-image 1s ease-in-out;
+        }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--overlay);
+            z-index: -1;
+        }
 
-    /* Home Screen */
-    #home-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
+        /* Forest Particle Effect */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(76, 175, 80, 0.7);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(-20vh); opacity: 0.8; }
+        }
 
-    .title {
-      font-size: 3rem;
-      margin-bottom: 10px;
-      color: var(--accent-color);
-    }
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--dark-container);
+            border-radius: 20px;
+            box-shadow: var(--glow), 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
 
-    .subtitle {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
-      opacity: 0.8;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-    .btn {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 5px;
-    }
+        h1 {
+            font-size: 2.8rem;
+            color: var(--primary-color);
+            text-shadow: var(--glow);
+            display: inline-flex;
+            align-items: center;
+        }
 
-    .btn:hover {
-      background-color: var(--secondary-accent);
-      transform: translateY(-2px);
-    }
+        .coin-icon, .leaf-icon {
+            width: 28px;
+            height: 28px;
+            margin: 0 8px;
+            transition: transform 0.3s ease;
+        }
+        .coin-icon:hover, .leaf-icon:hover {
+            transform: rotate(15deg) scale(1.1);
+        }
 
-    .btn-success {
-      background-color: var(--success-color);
-    }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 12px;
+            box-shadow: var(--glow);
+            margin-bottom: 2rem;
+            animation: slideIn 0.6s ease-out;
+        }
 
-    .clock-container {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
+        .stat {
+            text-align: center;
+        }
 
-    .light-blue-text {
-      color: #7fdbff;
-      font-size: 2rem;
-      font-weight: bold;
-    }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
 
-    .purple-text {
-      color: #8338ec;
-    }
+        .level-progress, .task-progress, .subject-progress {
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+        }
 
-    .timer-container {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-    }
+        .progress-bar, .task-progress-bar, .subject-progress-bar {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 8px var(--accent-color);
+        }
 
-    .timer-input {
-      width: 60px;
-      padding: 8px;
-      margin-right: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      color: white;
-    }
+        .task-progress-bar {
+            background: var(--primary-color);
+        }
 
-    #youtube-url-section {
-      margin-top: 30px;
-      width: 100%;
-      max-width: 600px;
-    }
+        .task-item.overdue .task-progress-bar {
+            background: var(--delete-color);
+            box-shadow: 0 0 8px var(--delete-color);
+        }
 
-    .url-input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      color: white;
-    }
+        button {
+            padding: 0.8rem 1.6rem;
+            background: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all var(--transition-time) ease;
+            box-shadow: var(--glow);
+        }
 
-    #audio-player {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 200px;
-    }
+        button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.6);
+        }
 
-    #audio-visualizer {
-      width: 200px;
-      height: 80px;
-      background: linear-gradient(90deg, #3a86ff, #8338ec);
-      border-radius: 5px;
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
+        .targets-btn {
+            background: var(--accent-color);
+            color: #1A1A1A;
+        }
 
-    .player-controls {
-      display: flex;
-      justify-content: center;
-    }
+        .targets-btn:hover {
+            background: #FFC107;
+        }
 
-    /* Focus Mode Screen */
-    #focus-mode-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 1000;
-    }
+        .targets-popup, .marks-input-popup, .level-up {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--dark-container);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--glow), 0 10px 40px rgba(0, 0, 0, 0.4);
+            max-height: 85vh;
+            overflow-y: auto;
+            z-index: 101;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
 
-    #focus-header {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      background: rgba(0,0,0,0.7);
-      z-index: 10;
-    }
+        .targets-popup.show, .marks-input-popup.show, .level-up.show {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
 
-    #pomodoro-timer {
-      font-size: 1.5rem;
-      color: var(--success-color);
-    }
+        .targets-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
 
-    #points-display {
-      font-size: 1.2rem;
-      color: var(--accent-color);
-    }
+        .targets-close:hover {
+            color: var(--delete-color);
+        }
 
-    #restart-button {
-      background-color: var(--danger-color);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+        .targets-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
 
-    #youtube-player {
-      width: 100%;
-      height: 100%;
-    }
+        .targets-table tr.class-row {
+            background: var(--secondary-color);
+            color: var(--light-text);
+            font-weight: 600;
+        }
 
-    .hidden {
-      display: none !important;
-    }
+        .targets-table tr.subject-row {
+            background: #FFF;
+            color: #000;
+            font-weight: 600;
+        }
 
-    /* Stats Section */
-    .stats-container {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      text-align: left;
-    }
+        .targets-table td {
+            padding: 0.6rem;
+            border-bottom: 1px solid #444;
+        }
 
-    .stats-title {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      color: var(--accent-color);
-    }
+        .progress-input {
+            width: 50px;
+            padding: 0.3rem;
+            background: var(--dark-input-bg);
+            color: var(--light-text);
+            border: 1px solid #555;
+            border-radius: 5px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
 
-    .stat-item {
-      margin: 8px 0;
-      font-size: 1.1rem;
-    }
-  </style>
+        .progress-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .add-task-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: var(--dark-input-bg);
+            color: var(--light-text);
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .deadline-inputs {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            background: var(--task-bg);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .task-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .task-deadline {
+            font-size: 0.95rem;
+            color: #B0BEC5;
+        }
+
+        .urgent {
+            color: var(--delete-color);
+            font-weight: bold;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .complete-btn {
+            background: var(--primary-color);
+        }
+
+        .delete-btn {
+            background: var(--delete-color);
+        }
+
+        .level-up h2 {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #90A4AE;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .blur {
+            filter: blur(6px);
+            transition: filter 0.5s ease;
+        }
+
+        .signin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .signin-overlay.show {
+            opacity: 1;
+        }
+
+        .signin-box {
+            background: var(--dark-container);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: var(--glow);
+            animation: popIn 0.5s ease-out;
+        }
+
+        .signin-box h2 {
+            color: var(--primary-color);
+            text-shadow: var(--glow);
+        }
+
+        .signin-error {
+            color: var(--delete-color);
+            font-size: 0.9rem;
+        }
+
+        .signout-btn {
+            background: var(--delete-color);
+        }
+
+        .graph-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--graph-bg);
+            z-index: 102;
+            transition: left var(--transition-time) ease;
+            padding: 2rem;
+        }
+
+        .graph-sidebar.open {
+            left: 0;
+        }
+
+        .graph-container {
+            background: #37474F;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes coinPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .coin-animation {
+            animation: coinPulse 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .add-task-form { grid-template-columns: 1fr; }
+            .deadline-inputs { flex-direction: column; }
+            .task-item { flex-direction: column; align-items: flex-start; }
+            .task-actions { margin-top: 1rem; }
+        }
+    </style>
 </head>
 <body>
-  <!-- Home Screen -->
-  <div id="home-screen">
-    <h1 class="title">Focus Mode YouTube Player</h1>
-    <p class="subtitle">Watch Videos without distraction like a GIGACHAD!</p>
-    
-    <div class="clock-container">
-      <div id="clock" class="light-blue-text">12:00 <span class="purple-text">PM</span></div>
-      <div class="timer-container">
-        <input type="number" id="timer-minutes" class="timer-input" min="1" max="180" value="50">
-        <button id="start-timer" class="btn">Set Timer</button>
-      </div>
-    </div>
-    
-    <div id="youtube-url-section">
-      <h2>Enter YouTube URLs</h2>
-      <div id="url-inputs">
-        <input type="text" class="url-input youtube-url" placeholder="Paste YouTube URL here">
-      </div>
-      <button id="add-more-url" class="btn">Add Another URL</button>
-      <button id="start-focus-mode" class="btn btn-success">Start Focus Mode</button>
-    </div>
-    
-    <div class="stats-container">
-      <h3 class="stats-title">Your Focus Stats</h3>
-      <div class="stat-item">Total Focus Time: <span id="total-focus-time">0</span> min</div>
-      <div class="stat-item">Total Distractions: <span id="total-distractions">0</span></div>
-      <div class="stat-item">Videos Watched: <span id="videos-watched">0</span></div>
-      <div class="stat-item">Total Points: <span id="total-points">0</span></div>
-    </div>
-    
-    <div id="audio-player">
-      <canvas id="audio-visualizer"></canvas>
-      <div class="player-controls">
-        <button id="play-pause" class="btn">▶️</button>
-      </div>
-      <audio id="background-music" loop>
-        <source src="https://www.dropbox.com/scl/fi/7qrgbk6vpej7x0ih7vev2/1-6_XRwBX7NX-1.mp3?rlkey=m3gntnys7az2hoq0iokkajucj&st=9ox8s9oi&dl=1" type="audio/mpeg">
-      </audio>
-      <audio id="alarm-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
-    </div>
-  </div>
-  
-  <!-- Focus Mode Screen (initially hidden) -->
-  <div id="focus-mode-screen" class="hidden">
-    <div id="focus-header">
-      <div id="focus-clock" class="light-blue-text">12:00 <span class="purple-text">PM</span></div>
-      <div id="pomodoro-timer">50:00</div>
-      <div id="points-display">Points: 0</div>
-      <button id="restart-button">Restart</button>
-    </div>
-    
-    <div id="youtube-player"></div>
-  </div>
+    <div id="particles"></div>
+    <div class="container main-content">
+        <header>
+            <h1>Forest Quest<img src="https://pngimg.com/d/coin_PNG36871.png" alt="Coin" class="coin-icon"><img src="https://i.ytimg.com/vi/eTeBsgG3lkw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBsbiZakg7W-jPkhJtBh3mS2zeNrQ" alt="Leaf" class="leaf-icon"></h1>
+            <p>Grow your forest by completing tasks and earning rewards!</p>
+        </header>
 
-  <!-- YouTube API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-  
-  <script>
-    // Global variables
-    let player;
-    let currentVideoIndex = 0;
-    let playlist = [];
-    let pomodoroInterval;
-    let pomodoroTimeLeft = 50 * 60; // 50 minutes in seconds
-    let focusModeActive = false;
-    let points = 0;
-    let userData = {
-      points: 0,
-      focusTime: 0,
-      distractions: 0,
-      videosWatched: 0
-    };
-    let alarmLoopInterval;
-    
-    // Initialize the application
-    function init() {
-      updateClock();
-      setInterval(updateClock, 1000);
-      loadUserData();
-      setupEventListeners();
-      setupAudioVisualizer();
-    }
-    
-    // Update the clock display
-    function updateClock() {
-      const now = new Date();
-      let hours = now.getHours();
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      
-      hours = hours % 12;
-      hours = hours ? hours : 12; // Convert 0 to 12
-      
-      document.getElementById('clock').innerHTML = 
-        `${hours}:${minutes} <span class="purple-text">${ampm}</span>`;
-      
-      if (document.getElementById('focus-clock')) {
-        document.getElementById('focus-clock').innerHTML = 
-          `${hours}:${minutes} <span class="purple-text">${ampm}</span>`;
-      }
-    }
-    
-    // Load user data from localStorage
-    function loadUserData() {
-      userData = JSON.parse(localStorage.getItem('focusModeData')) || {
-        points: 0,
-        focusTime: 0,
-        distractions: 0,
-        videosWatched: 0
-      };
-      
-      document.getElementById('total-focus-time').textContent = userData.focusTime;
-      document.getElementById('total-distractions').textContent = userData.distractions;
-      document.getElementById('videos-watched').textContent = userData.videosWatched;
-      document.getElementById('total-points').textContent = userData.points;
-      
-      points = userData.points;
-    }
-    
-    // Save user data to localStorage
-    function saveUserData() {
-      localStorage.setItem('focusModeData', JSON.stringify(userData));
-      
-      // Update stats display
-      document.getElementById('total-focus-time').textContent = userData.focusTime;
-      document.getElementById('total-distractions').textContent = userData.distractions;
-      document.getElementById('videos-watched').textContent = userData.videosWatched;
-      document.getElementById('total-points').textContent = userData.points;
-    }
-    
-    // Setup event listeners
-    function setupEventListeners() {
-      // Add more URL button
-      document.getElementById('add-more-url').addEventListener('click', function() {
-        const urlInputs = document.getElementById('url-inputs');
-        const newInput = document.createElement('input');
-        newInput.type = 'text';
-        newInput.className = 'url-input youtube-url';
-        newInput.placeholder = 'Paste YouTube URL here';
-        urlInputs.appendChild(newInput);
-      });
-      
-      // Start Focus Mode button
-      document.getElementById('start-focus-mode').addEventListener('click', startFocusMode);
-      
-      // Restart button
-      document.getElementById('restart-button').addEventListener('click', endFocusMode);
-      
-      // Play/Pause button for lofi music
-      document.getElementById('play-pause').addEventListener('click', toggleBackgroundMusic);
-      
-      // Timer button
-      document.getElementById('start-timer').addEventListener('click', function() {
-        const minutes = parseInt(document.getElementById('timer-minutes').value);
-        if (minutes > 0) {
-          alert(`Timer set for ${minutes} minutes`);
-          // Timer implementation would go here
-        }
-      });
-      
-      // Tab visibility change
-      document.addEventListener('visibilitychange', function() {
-        if (document.hidden && focusModeActive) {
-          playAlarmSound();
-          deductPoints(10);
-          
-          // Update distraction count
-          userData.distractions += 1;
-          saveUserData();
-        }
-      });
-      
-      // Key press for video switching
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'T' && focusModeActive) {
-          switchToNextVideo();
-        }
-      });
-      
-      // Prevent tab closing (will show a confirmation)
-      window.addEventListener('beforeunload', function(e) {
-        if (focusModeActive) {
-          e.preventDefault();
-          e.returnValue = 'Are you sure you want to leave? You will lose points!';
-          return e.returnValue;
-        }
-      });
-    }
-    
-    // Setup audio visualizer
-    function setupAudioVisualizer() {
-      const audioElement = document.getElementById('background-music');
-      const canvas = document.getElementById('audio-visualizer');
-      const canvasCtx = canvas.getContext('2d');
-      
-      canvas.width = 200;
-      canvas.height = 80;
-      
-      // Audio context setup
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser = audioCtx.createAnalyser();
-      const source = audioCtx.createMediaElementSource(audioElement);
-      
-      source.connect(analyser);
-      analyser.connect(audioCtx.destination);
-      
-      analyser.fftSize = 256;
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      
-      // Visualization loop
-      function draw() {
-        requestAnimationFrame(draw);
-        
-        if (audioElement.paused) {
-          canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-          return;
-        }
-        
-        analyser.getByteFrequencyData(dataArray);
-        
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const barWidth = (canvas.width / bufferLength) * 2.5;
-        let barHeight;
-        let x = 0;
-        
-        for(let i = 0; i < bufferLength; i++) {
-          barHeight = dataArray[i] / 2;
-          
-          // Create gradient from blue to purple
-          const gradient = canvasCtx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
-          gradient.addColorStop(0, '#3a86ff');
-          gradient.addColorStop(1, '#8338ec');
-          
-          canvasCtx.fillStyle = gradient;
-          canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-          
-          x += barWidth + 1;
-        }
-      }
-      
-      draw();
-    }
-    
-    // Toggle background music
-    function toggleBackgroundMusic() {
-      const audioElement = document.getElementById('background-music');
-      const playPauseButton = document.getElementById('play-pause');
-      
-      if (audioElement.paused) {
-        audioElement.play();
-        playPauseButton.textContent = '❚❚';
-      } else {
-        audioElement.pause();
-        playPauseButton.textContent = '▶️';
-      }
-    }
-    
-    // Play alarm sound
-    function playAlarmSound() {
-      const alarmSound = document.getElementById('alarm-sound');
-      
-      // Clear any existing alarm loops
-      if (alarmLoopInterval) {
-        clearInterval(alarmLoopInterval);
-        alarmLoopInterval = null;
-      }
-      
-      // Loop the alarm sound
-      alarmSound.play();
-      alarmLoopInterval = setInterval(() => {
-        alarmSound.currentTime = 0;
-        alarmSound.play();
-      }, 2000); // Loop every 2 seconds
-      
-      // Stop alarm when tab gets focus again
-      document.addEventListener('visibilitychange', function stopAlarm() {
-        if (!document.hidden && alarmLoopInterval) {
-          clearInterval(alarmLoopInterval);
-          alarmLoopInterval = null;
-          alarmSound.pause();
-          alarmSound.currentTime = 0;
-          document.removeEventListener('visibilitychange', stopAlarm);
-        }
-      });
-    }
-    
-    // Deduct points
-    function deductPoints(amount) {
-      points -= amount;
-      userData.points -= amount;
-      document.getElementById('points-display').textContent = `Points: ${points}`;
-      saveUserData();
-    }
-    
-    // Add points
-    function addPoints(amount) {
-      points += amount;
-      userData.points += amount;
-      document.getElementById('points-display').textContent = `Points: ${points}`;
-      saveUserData();
-    }
-    
-    // Start Focus Mode
-    function startFocusMode() {
-      const urls = Array.from(document.querySelectorAll('.youtube-url'))
-        .map(input => input.value)
-        .filter(url => url.trim() !== '');
-      
-      if (urls.length === 0) {
-        alert('Please enter at least one YouTube URL');
-        return;
-      }
-      
-      playlist = urls.map(url => {
-        // Extract video ID from URL
-        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-        const match = url.match(regex);
-        return match ? match[1] : url;
-      });
-      
-      document.getElementById('home-screen').classList.add('hidden');
-      document.getElementById('focus-mode-screen').classList.remove('hidden');
-      
-      // Initialize the YouTube player
-      if (typeof YT !== 'undefined' && YT.loaded) {
-        createYouTubePlayer();
-      } else {
-        // Wait for YouTube API to load
-        window.onYouTubeIframeAPIReady = createYouTubePlayer;
-      }
-      
-      focusModeActive = true;
-      startPomodoroTimer();
-      
-      // Set initial points display
-      document.getElementById('points-display').textContent = `Points: ${points}`;
-      
-      // Track this video as watched
-      userData.videosWatched += 1;
-      saveUserData();
-    }
-    
-    // Create YouTube Player
-    function createYouTubePlayer() {
-      player = new YT.Player('youtube-player', {
-        height: '100%',
-        width: '100%',
-        videoId: playlist[0],
-        playerVars: {
-          'autoplay': 1,
-          'controls': 1,
-          'rel': 0,
-          'fs': 1
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
-      });
-    }
-    
-    // When YouTube player is ready
-    function onPlayerReady(event) {
-      event.target.playVideo();
-    }
-    
-    // When YouTube player state changes
-    function onPlayerStateChange(event) {
-      // When video ends, go to next video
-      if (event.data === YT.PlayerState.ENDED) {
-        switchToNextVideo();
-      }
-    }
-    
-    // Switch to next video
-    function switchToNextVideo() {
-      currentVideoIndex = (currentVideoIndex + 1) % playlist.length;
-      player.loadVideoById(playlist[currentVideoIndex]);
-      
-      // Track this video as watched
-      userData.videosWatched += 1;
-      saveUserData();
-    }
-    
-    // Start Pomodoro Timer
-    function startPomodoroTimer() {
-      pomodoroTimeLeft = 50 * 60; // 50 minutes in seconds
-      updatePomodoroDisplay();
-      
-      pomodoroInterval = setInterval(() => {
-        pomodoroTimeLeft--;
-        updatePomodoroDisplay();
-        
-        if (pomodoroTimeLeft <= 0) {
-          // Pomodoro completed
-          clearInterval(pomodoroInterval);
-          
-          // Add points for completion
-          addPoints(80);
-          
-          // Add to total focus time
-          userData.focusTime += 50;
-          saveUserData();
-          
-          alert('Congratulations! You completed a 50-minute focus session and earned 80 points!');
-        }
-      }, 1000);
-    }
-    
-    // Update Pomodoro Timer Display
-    function updatePomodoroDisplay() {
-      const minutes = Math.floor(pomodoroTimeLeft / 60);
-      const seconds = pomodoroTimeLeft % 60;
-      
-      document.getElementById('pomodoro-timer').textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    // End Focus Mode
-    function endFocusMode() {
-      document.getElementById('focus-mode-screen').classList.add('hidden');
-      document.getElementById('home-screen').classList.remove('hidden');
-      
-      // Stop pomodoro timer
-      if (pomodoroInterval) {
-        clearInterval(pomodoroInterval);
-      }
-      
-      // Stop any alarm sounds
-      if (alarmLoopInterval) {
-        clearInterval(alarmLoopInterval);
-        alarmLoopInterval = null;
-        
-        const alarmSound = document.getElementById('alarm-sound');
-        alarmSound.pause
-        alarmSound.pause();
-        alarmSound.currentTime = 0;
-      }
-      
-      focusModeActive = false;
-      
-      // Destroy the YouTube player
-      if (player && player.destroy) {
-        player.destroy();
-      }
-    }
-    
-    // Initialize the app when the page loads
-    window.addEventListener('load', init);
-  </script>
+        <button class="signout-btn" id="signout-btn" style="display: none;">Sign Out</button>
+
+        <div class="stats">
+            <div class="stat"><div>LEVEL</div><div class="stat-value" id="level">1</div></div>
+            <div class="stat"><div>COINS</div><div class="stat-value" id="coins">0</div></div>
+            <div class="stat"><div>TASKS DONE</div><div class="stat-value" id="tasks-completed">0</div></div>
+        </div>
+
+        <div>
+            <div>Level Progress</div>
+            <div class="level-progress"><div class="progress-bar" id="level-progress-bar" style="width: 0%"></div></div>
+        </div>
+
+        <form id="add-task-form" class="add-task-form">
+            <div class="form-group">
+                <label for="task-name">Task Name:</label>
+                <input type="text" id="task-name" required placeholder="Enter task...">
+            </div>
+            <div class="form-group">
+                <label for="deadline-date">Deadline:</label>
+                <div class="deadline-inputs">
+                    <input type="date" id="deadline-date" required>
+                    <input type="time" id="deadline-time" required>
+                </div>
+            </div>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <button class="targets-btn" id="targets-btn">Targets</button>
+
+        <div>
+            <h2>Tasks</h2>
+            <ul id="task-list" class="task-list">
+                <div class="empty-state" id="empty-tasks">No tasks yet—add one to begin!</div>
+            </ul>
+        </div>
+    </div>
+
+    <div class="level-up" id="level-up-popup">
+        <h2>Level Up!</h2>
+        <p>You’ve reached Level <span id="new-level">2</span>!</p>
+        <p>Your forest flourishes...</p>
+        <button id="level-up-ok">Continue</button>
+    </div>
+
+    <div class="targets-popup" id="targets-popup">
+        <button class="targets-close" id="targets-close">×</button>
+        <table class="targets-table">
+            <tbody>
+                <tr class="class-row"><td colspan="3">Class 11</td></tr>
+                <tr class="subject-row"><td colspan="3">Physics</td></tr>
+                <tr class="topic-row"><td>Physical World</td><td><div class="subject-progress" data-subject="Physical World"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <!-- Add more topics as needed -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="signin-overlay" id="signin-overlay">
+        <div class="signin-box">
+            <h2>Sign In</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <label><input type="checkbox" id="stay-signed-in"> Stay Signed In</label>
+            <button id="signin-btn">Sign In</button>
+            <p class="signin-error" id="signin-error" style="display: none;">Invalid credentials</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game State
+            let gameState = { coins: 0, level: 1, tasksCompleted: 0, tasks: new Map() };
+            let subjectProgress = new Map();
+            let currentUser = null;
+
+            // DOM Elements
+            const elements = {
+                coins: document.getElementById('coins'),
+                level: document.getElementById('level'),
+                tasksCompleted: document.getElementById('tasks-completed'),
+                progressBar: document.getElementById('level-progress-bar'),
+                taskList: document.getElementById('task-list'),
+                emptyTasks: document.getElementById('empty-tasks'),
+                addTaskForm: document.getElementById('add-task-form'),
+                taskName: document.getElementById('task-name'),
+                deadlineDate: document.getElementById('deadline-date'),
+                deadlineTime: document.getElementById('deadline-time'),
+                levelUpPopup: document.getElementById('level-up-popup'),
+                newLevel: document.getElementById('new-level'),
+                levelUpOk: document.getElementById('level-up-ok'),
+                targetsBtn: document.getElementById('targets-btn'),
+                targetsPopup: document.getElementById('targets-popup'),
+                targetsClose: document.getElementById('targets-close'),
+                signinOverlay: document.getElementById('signin-overlay'),
+                signinBtn: document.getElementById('signin-btn'),
+                username: document.getElementById('username'),
+                password: document.getElementById('password'),
+                staySignedIn: document.getElementById('stay-signed-in'),
+                signinError: document.getElementById('signin-error'),
+                mainContent: document.querySelector('.main-content'),
+                signoutBtn: document.getElementById('signout-btn')
+            };
+
+            const backgroundImages = {
+                0: 'https://assets.grok.com/users/61aa03d5-34a6-451f-a29b-c678af050623/7qqe1265AFQU0oyA-generated_image.jpg',
+                1: 'https://ih1.redbubble.net/image.4971990187.8956/raf,360x360,075,t,fafafa:ca443f4786.jpg',
+                2: 'https://wallpapers.com/images/hd/lo-fi-anime-chill-zpbeiv7k1y45zwat.jpg',
+                3: 'https://i.ytimg.com/vi/KAqUpjcs_xc/hq720.jpg',
+                4: 'https://i1.sndcdn.com/artworks-G9UzrSoAlsn4Ed7i-AAjR3Q-t500x500.jpg',
+                5: 'https://i1.sndcdn.com/artworks-RqAOy7Z3ktf3xBLd-5KXuqA-t500x500.jpg'
+            };
+
+            let intervalId = null;
+
+            // Particle Effect
+            const particlesDiv = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 8}s`;
+                particlesDiv.appendChild(particle);
+            }
+
+            // User Management
+            const loadUsers = () => JSON.parse(localStorage.getItem('forestQuestUsers')) || {};
+            const saveUsers = users => localStorage.setItem('forestQuestUsers', JSON.stringify(users));
+            const loadSignedInUser = () => localStorage.getItem('signedInUser');
+            const saveSignedInUser = username => localStorage.setItem('signedInUser', username);
+            const clearSignedInUser = () => localStorage.removeItem('signedInUser');
+
+            function signIn(username, password, staySignedIn) {
+                const users = loadUsers();
+                if (users[username]?.password === password || !users[username]) {
+                    if (!users[username]) {
+                        users[username] = { password };
+                        saveUsers(users);
+                    }
+                    currentUser = username;
+                    if (staySignedIn) saveSignedInUser(username);
+                    elements.signinOverlay.classList.remove('show');
+                    elements.mainContent.classList.remove('blur');
+                    elements.signoutBtn.style.display = 'block';
+                    loadGameState();
+                    loadSubjectProgress();
+                } else {
+                    elements.signinError.style.display = 'block';
+                }
+            }
+
+            function signOut() {
+                currentUser = null;
+                clearSignedInUser();
+                elements.signoutBtn.style.display = 'none';
+                elements.mainContent.classList.add('blur');
+                elements.signinOverlay.classList.add('show');
+                elements.username.value = '';
+                elements.password.value = '';
+                elements.staySignedIn.checked = false;
+                elements.signinError.style.display = 'none';
+                if (intervalId) clearInterval(intervalId);
+            }
+
+            elements.signinBtn.addEventListener('click', () => {
+                const username = elements.username.value.trim();
+                const password = elements.password.value.trim();
+                if (username && password) signIn(username, password, elements.staySignedIn.checked);
+            });
+
+            elements.signoutBtn.addEventListener('click', signOut);
+
+            // Game Logic
+            function loadGameState() {
+                if (!currentUser) return;
+                const savedState = JSON.parse(localStorage.getItem(`forestQuestState_${currentUser}`));
+                if (savedState) {
+                    gameState = {
+                        coins: savedState.coins || 0,
+                        level: savedState.level || 1,
+                        tasksCompleted: savedState.tasksCompleted || 0,
+                        tasks: new Map(savedState.tasks?.map(t => [t.id, t]) || [])
+                    };
+                }
+                updateUI();
+                updateBackground();
+                renderTasks();
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(checkDeadlines, 30000); // Reduced interval for better responsiveness
+            }
+
+            function saveGameState() {
+                if (!currentUser) return;
+                localStorage.setItem(`forestQuestState_${currentUser}`, JSON.stringify({
+                    coins: gameState.coins,
+                    level: gameState.level,
+                    tasksCompleted: gameState.tasksCompleted,
+                    tasks: Array.from(gameState.tasks.values())
+                }));
+            }
+
+            function updateUI() {
+                elements.coins.textContent = gameState.coins;
+                elements.level.textContent = gameState.level;
+                elements.tasksCompleted.textContent = gameState.tasksCompleted;
+                const progress = (gameState.coins % 1000) / 10;
+                elements.progressBar.style.width = `${Math.min(progress, 100)}%`;
+            }
+
+            function updateBackground() {
+                document.body.style.backgroundImage = `url('${backgroundImages[Math.min(gameState.level, 5)]}')`;
+            }
+
+            function generateTaskId() {
+                return `${Date.now().toString(36)}${Math.random().toString(36).substr(2, 5)}`;
+            }
+
+            function formatDateTime(date) {
+                return new Date(date).toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+            }
+
+            function calculateTaskProgress(deadline, created) {
+                const now = Date.now();
+                const deadlineDate = new Date(deadline).getTime();
+                const createdDate = new Date(created).getTime();
+                const progress = ((now - createdDate) / (deadlineDate - createdDate)) * 100;
+                return Math.min(Math.max(progress, 0), 100);
+            }
+
+            function renderTasks() {
+                elements.taskList.innerHTML = gameState.tasks.size === 0 ? '' : '';
+                elements.emptyTasks.style.display = gameState.tasks.size === 0 ? 'block' : 'none';
+
+                const fragment = document.createDocumentFragment();
+                Array.from(gameState.tasks.values())
+                    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+                    .forEach(task => {
+                        const isOverdue = new Date(task.deadline) < new Date();
+                        const progress = calculateTaskProgress(task.deadline, task.created);
+                        const taskItem = document.createElement('li');
+                        taskItem.className = `task-item ${isOverdue ? 'overdue' : ''}`;
+                        taskItem.dataset.id = task.id;
+                        taskItem.innerHTML = `
+                            <div class="task-details">
+                                <div class="task-name">${task.name}</div>
+                                <div class="task-deadline ${isOverdue ? 'urgent' : ''}">
+                                    ${isOverdue ? '⚠️ Overdue: ' : 'Due: '}${formatDateTime(task.deadline)}
+                                </div>
+                                <div class="task-progress">
+                                    <div class="task-progress-bar" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="complete-btn">✓</button>
+                                <button class="delete-btn">✗</button>
+                            </div>
+                        `;
+                        taskItem.querySelector('.complete-btn').addEventListener('click', () => completeTask(task.id));
+                        taskItem.querySelector('.delete-btn').addEventListener('click', () => deleteTask(task.id));
+                        fragment.appendChild(taskItem);
+                    });
+                elements.taskList.appendChild(fragment);
+            }
+
+            function addTask(name, deadline) {
+                const id = generateTaskId();
+                if (gameState.tasks.has(id) || Array.from(gameState.tasks.values()).some(t => t.name === name && t.deadline === deadline)) return;
+                gameState.tasks.set(id, { id, name, deadline, created: new Date().toISOString() });
+                saveGameState();
+                renderTasks();
+            }
+
+            function completeTask(taskId) {
+                if (!gameState.tasks.has(taskId)) return;
+                gameState.tasks.delete(taskId);
+                gameState.coins += 100;
+                gameState.tasksCompleted++;
+                checkLevelUp();
+                saveGameState();
+                renderTasks();
+                updateUI();
+            }
+
+            function deleteTask(taskId) {
+                gameState.tasks.delete(taskId);
+                saveGameState();
+                renderTasks();
+            }
+
+            function checkLevelUp() {
+                const newLevel = Math.floor(gameState.coins / 1000) + 1;
+                if (newLevel > gameState.level) {
+                    gameState.level = newLevel;
+                    elements.newLevel.textContent = newLevel;
+                    elements.levelUpPopup.classList.add('show');
+                    updateBackground();
+                }
+            }
+
+            function checkDeadlines() {
+                let penalty = false;
+                for (const task of gameState.tasks.values()) {
+                    if (new Date(task.deadline) < new Date()) penalty = true;
+                }
+                if (penalty) gameState.coins = Math.max(0, gameState.coins - 50);
+                saveGameState();
+                updateUI();
+                renderTasks();
+            }
+
+            // Subject Progress
+            function loadSubjectProgress() {
+                if (!currentUser) return;
+                const saved = JSON.parse(localStorage.getItem(`subjectProgress_${currentUser}`));
+                if (saved) subjectProgress = new Map(saved);
+                updateSubjectProgressBars();
+            }
+
+            function saveSubjectProgress() {
+                if (!currentUser) localStorage.setItem(`subjectProgress_${currentUser}`, JSON.stringify([...subjectProgress]));
+            }
+
+            function updateSubjectProgressBars() {
+                document.querySelectorAll('.subject-progress').forEach(bar => {
+                    const subject = bar.dataset.subject;
+                    const progress = (subjectProgress.get(subject) || 0) / 112 * 100; // Assuming 112 questions per topic
+                    bar.querySelector('.subject-progress-bar').style.width = `${Math.min(progress, 100)}%`;
+                    const input = bar.parentElement.nextElementSibling.querySelector('.progress-input');
+                    input.value = subjectProgress.get(subject) || '';
+                });
+            }
+
+            document.querySelectorAll('.progress-input').forEach(input => {
+                input.addEventListener('input', e => {
+                    const subject = e.target.closest('tr').querySelector('.subject-progress').dataset.subject;
+                    const value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
+                    subjectProgress.set(subject, value);
+                    saveSubjectProgress();
+                    updateSubjectProgressBars();
+                });
+            });
+
+            // Event Listeners
+            elements.addTaskForm.addEventListener('submit', e => {
+                e.preventDefault();
+                const name = elements.taskName.value.trim();
+                const deadline = new Date(`${elements.deadlineDate.value}T${elements.deadlineTime.value}`).toISOString();
+                if (name && deadline) {
+                    addTask(name, deadline);
+                    elements.taskName.value = '';
+                }
+            });
+
+            elements.levelUpOk.addEventListener('click', () => elements.levelUpPopup.classList.remove('show'));
+            elements.targetsBtn.addEventListener('click', () => elements.targetsPopup.classList.add('show'));
+            elements.targetsClose.addEventListener('click', () => elements.targetsPopup.classList.remove('show'));
+
+            // Initialization
+            const today = new Date();
+            elements.deadlineDate.value = today.toISOString().split('T')[0];
+            elements.deadlineTime.value = '23:59';
+
+            const signedInUser = loadSignedInUser();
+            if (signedInUser) {
+                currentUser = signedInUser;
+                elements.signinOverlay.classList.remove('show');
+                elements.mainContent.classList.remove('blur');
+                elements.signoutBtn.style.display = 'block';
+                loadGameState();
+                loadSubjectProgress();
+            } else {
+                elements.mainContent.classList.add('blur');
+                elements.signinOverlay.classList.add('show');
+            }
+        });
+    </script>
 </body>
 </html>
