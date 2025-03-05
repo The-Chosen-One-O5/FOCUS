@@ -8,38 +8,39 @@
     <style>
         :root {
             --primary-color: #4CAF50;
-            --secondary-color: #2E7D32;
+            --secondary-color: #388E3C;
             --accent-color: #FFD700;
-            --light-text: #E0E0E0;
-            --delete-color: #D32F2F;
-            --task-bg: rgba(50, 60, 50, 0.9);
-            --transition-time: 0.4s;
-            --dark-bg: #1C2526;
-            --dark-container: rgba(40, 50, 40, 0.95);
-            --dark-input-bg: #2A3439;
-            --overlay: rgba(0, 0, 0, 0.5);
-            --graph-bg: #263238;
-            --glow: 0 0 10px rgba(76, 175, 80, 0.5);
+            --light-text: #FFFFFF;
+            --delete-color: #F44336;
+            --task-bg: rgba(40, 40, 40, 0.85);
+            --transition-time: 0.3s;
+            --dark-bg: #1A1A1A;
+            --dark-container: rgba(40, 40, 40, 0.9);
+            --dark-input-bg: #2C2C2C;
+            --overlay: rgba(0, 0, 0, 0.4);
+            --graph-bg: #2A2A2A;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: url('https://assets.grok.com/users/61aa03d5-34a6-451f-a29b-c678af050623/7qqe1265AFQU0oyA-generated_image.jpg') no-repeat center/cover fixed;
+            background-size: contain;
+            background-position: center;
+            background-attachment: fixed;
             min-height: 100vh;
+            transition: background-image 1s ease-in-out;
             display: flex;
             flex-direction: column;
             align-items: center;
             background-color: var(--dark-bg);
             color: var(--light-text);
             position: relative;
-            overflow-x: hidden;
-            transition: background-image 1s ease-in-out;
+            overflow: hidden;
         }
 
         body::before {
@@ -53,8 +54,8 @@
             z-index: -1;
         }
 
-        /* Forest Particle Effect */
-        #particles {
+        /* Particle Effects */
+        .particles {
             position: fixed;
             top: 0;
             left: 0;
@@ -63,31 +64,29 @@
             pointer-events: none;
             z-index: 0;
         }
+
         .particle {
             position: absolute;
             width: 4px;
             height: 4px;
             background: rgba(76, 175, 80, 0.7);
             border-radius: 50%;
-            animation: float 8s infinite ease-in-out;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); opacity: 0.3; }
-            50% { transform: translateY(-20vh); opacity: 0.8; }
+            animation: float linear infinite;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
         }
 
         .container {
             width: 90%;
-            max-width: 850px;
+            max-width: 800px;
             margin: 2rem auto;
-            padding: 2rem;
-            background: var(--dark-container);
-            border-radius: 20px;
-            box-shadow: var(--glow), 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(12px);
+            padding: 1.5rem;
+            background-color: var(--dark-container);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            color: var(--light-text);
             position: relative;
             z-index: 1;
-            animation: fadeIn 0.8s ease-out;
         }
 
         header {
@@ -96,195 +95,211 @@
         }
 
         h1 {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
             color: var(--primary-color);
-            text-shadow: var(--glow);
             display: inline-flex;
             align-items: center;
         }
 
-        .coin-icon, .leaf-icon {
-            width: 28px;
-            height: 28px;
-            margin: 0 8px;
-            transition: transform 0.3s ease;
+        .coin-icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 5px;
         }
-        .coin-icon:hover, .leaf-icon:hover {
-            transform: rotate(15deg) scale(1.1);
+
+        .leaf-icon {
+            width: 30px;
+            height: 30px;
+            vertical-align: middle;
+            margin-left: 10px;
         }
 
         .stats {
             display: flex;
             justify-content: space-around;
-            padding: 1.2rem;
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-            border-radius: 12px;
-            box-shadow: var(--glow);
-            margin-bottom: 2rem;
-            animation: slideIn 0.6s ease-out;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            color: var(--light-text);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .stat {
             text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
         .stat-value {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: var(--accent-color);
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
         }
 
-        .level-progress, .task-progress, .subject-progress {
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
+        .level-progress {
+            height: 12px;
+            background-color: #444;
+            border-radius: 6px;
+            margin: 0.5rem 0 1.5rem;
             overflow: hidden;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
         }
 
-        .progress-bar, .task-progress-bar, .subject-progress-bar {
+        .progress-bar {
             height: 100%;
-            background: var(--accent-color);
-            border-radius: 5px;
+            background-color: var(--accent-color);
+            border-radius: 6px;
             transition: width 0.5s ease-in-out;
-            box-shadow: 0 0 8px var(--accent-color);
+        }
+
+        .task-progress {
+            height: 8px;
+            background-color: #444;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            overflow: hidden;
         }
 
         .task-progress-bar {
-            background: var(--primary-color);
-        }
-
-        .task-item.overdue .task-progress-bar {
-            background: var(--delete-color);
-            box-shadow: 0 0 8px var(--delete-color);
-        }
-
-        button {
-            padding: 0.8rem 1.6rem;
-            background: var(--primary-color);
-            color: var(--light-text);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: all var(--transition-time) ease;
-            box-shadow: var(--glow);
-        }
-
-        button:hover {
-            background: var(--secondary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.6);
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out;
         }
 
         .targets-btn {
-            background: var(--accent-color);
-            color: #1A1A1A;
+            margin: 1rem 0;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color var(--transition-time) ease, transform var(--transition-time) ease;
         }
 
         .targets-btn:hover {
-            background: #FFC107;
+            background-color: #e6c200;
+            transform: translateY(-2px);
         }
 
-        .targets-popup, .marks-input-popup, .level-up {
+        .targets-popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--dark-container);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: var(--glow), 0 10px 40px rgba(0, 0, 0, 0.4);
-            max-height: 85vh;
+            background-color: rgba(40, 40, 40, 0.95);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-height: 80vh;
             overflow-y: auto;
+            width: 90%;
+            max-width: 700px;
             z-index: 101;
             display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .targets-popup.show, .marks-input-popup.show, .level-up.show {
-            display: block;
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
         }
 
         .targets-close {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
             background: none;
             border: none;
             color: var(--light-text);
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .targets-close:hover {
-            color: var(--delete-color);
         }
 
         .targets-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem;
         }
 
         .targets-table tr.class-row {
-            background: var(--secondary-color);
+            background-color: var(--primary-color);
             color: var(--light-text);
-            font-weight: 600;
+            font-weight: bold;
         }
 
         .targets-table tr.subject-row {
-            background: #FFF;
+            background-color: #FFFFFF;
             color: #000;
-            font-weight: 600;
+            font-weight: bold;
+        }
+
+        .targets-table tr.topic-row {
+            background-color: #FFFFFF;
+            color: #000;
         }
 
         .targets-table td {
-            padding: 0.6rem;
+            padding: 0.5rem;
             border-bottom: 1px solid #444;
         }
 
-        .progress-input {
-            width: 50px;
-            padding: 0.3rem;
-            background: var(--dark-input-bg);
-            color: var(--light-text);
-            border: 1px solid #555;
+        .subject-progress {
+            height: 10px;
+            background-color: #ddd;
             border-radius: 5px;
-            text-align: center;
-            transition: border-color 0.3s ease;
+            overflow: hidden;
+            width: 150px;
         }
 
-        .progress-input:focus {
-            border-color: var(--primary-color);
-            outline: none;
+        .subject-progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-input {
+            width: 60px;
+            padding: 0.25rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: var(--dark-input-bg);
+            color: var(--light-text);
+            text-align: center;
+        }
+
+        .task-item.overdue .task-progress-bar {
+            background-color: var(--delete-color);
+        }
+
+        .add-task {
+            margin-bottom: 2rem;
         }
 
         .add-task-form {
             display: grid;
             grid-template-columns: 1fr auto;
-            gap: 1.2rem;
-            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--light-text);
+            font-weight: 500;
         }
 
         input, select {
-            padding: 0.8rem;
-            border: 1px solid #555;
-            border-radius: 6px;
-            background: var(--dark-input-bg);
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--dark-input-bg);
             color: var(--light-text);
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--primary-color);
-            outline: none;
         }
 
         .deadline-inputs {
@@ -292,36 +307,64 @@
             gap: 1rem;
         }
 
+        .deadline-inputs select, .deadline-inputs input {
+            flex: 1;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color var(--transition-time) ease, transform var(--transition-time) ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
         .task-list {
             list-style: none;
+            margin-top: 1rem;
         }
 
         .task-item {
-            background: var(--task-bg);
-            border-radius: 10px;
-            padding: 1.2rem;
+            background-color: var(--task-bg);
+            border-radius: 8px;
+            padding: 1rem;
             margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             animation: slideIn 0.5s ease-out;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: var(--light-text);
         }
 
         .task-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .task-details {
+            flex: 1;
         }
 
         .task-name {
-            font-size: 1.2rem;
             font-weight: 500;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
         }
 
         .task-deadline {
-            font-size: 0.95rem;
-            color: #B0BEC5;
+            color: #B0B0B0;
+            font-size: 0.9rem;
         }
 
         .urgent {
@@ -331,32 +374,52 @@
 
         .task-actions {
             display: flex;
-            gap: 0.8rem;
+            gap: 0.75rem;
         }
 
         .complete-btn {
-            background: var(--primary-color);
+            background-color: var(--primary-color);
         }
 
         .delete-btn {
-            background: var(--delete-color);
+            background-color: var(--delete-color);
+        }
+
+        .level-up {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--light-text);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 100;
+            animation: popIn 0.5s ease-out;
+            display: none;
         }
 
         .level-up h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
             color: var(--accent-color);
-            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .level-up p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
         }
 
         .empty-state {
             text-align: center;
             padding: 2rem;
-            color: #90A4AE;
-            animation: fadeIn 0.8s ease;
+            color: #B0B0B0;
         }
 
         .blur {
-            filter: blur(6px);
-            transition: filter 0.5s ease;
+            filter: blur(5px);
+            pointer-events: none;
         }
 
         .signin-overlay {
@@ -365,39 +428,63 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 200;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .signin-overlay.show {
-            opacity: 1;
         }
 
         .signin-box {
-            background: var(--dark-container);
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: var(--glow);
-            animation: popIn 0.5s ease-out;
+            background-color: var(--dark-container);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .signin-box h2 {
             color: var(--primary-color);
-            text-shadow: var(--glow);
+            margin-bottom: 1.5rem;
+        }
+
+        .signin-box input[type="text"], .signin-box input[type="password"] {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            width: 100%;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: var(--dark-input-bg);
+            color: var(--light-text);
+        }
+
+        .signin-box input[type="checkbox"] {
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .signin-box label {
+            display: inline-block;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .signin-box button {
+            width: 100%;
+            margin-top: 1rem;
         }
 
         .signin-error {
             color: var(--delete-color);
-            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: none;
         }
 
         .signout-btn {
-            background: var(--delete-color);
+            background-color: var(--delete-color);
+            margin-top: 1rem;
         }
 
         .graph-sidebar {
@@ -406,9 +493,12 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: var(--graph-bg);
+            background-color: var(--graph-bg);
             z-index: 102;
             transition: left var(--transition-time) ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 2rem;
         }
 
@@ -416,10 +506,81 @@
             left: 0;
         }
 
+        .graph-title {
+            color: var(--light-text);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
         .graph-container {
-            background: #37474F;
+            width: 90%;
+            max-width: 1000px;
+            height: 80%;
+            background-color: #333;
             border-radius: 10px;
             padding: 1rem;
+        }
+
+        .add-marks-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color var(--transition-time) ease;
+        }
+
+        .add-marks-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .marks-input-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--dark-container);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 103;
+            display: none;
+        }
+
+        .marks-input-popup input {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            width: 100%;
+            background-color: var(--dark-input-bg);
+            color: var(--light-text);
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+
+        .marks-input-popup button {
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh);
+                opacity: 0;
+            }
         }
 
         @keyframes fadeIn {
@@ -428,19 +589,42 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            70% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
 
         @keyframes coinPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.3);
+                color: var(--accent-color);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .coin-animation {
@@ -448,76 +632,224 @@
         }
 
         @media (max-width: 600px) {
-            .add-task-form { grid-template-columns: 1fr; }
-            .deadline-inputs { flex-direction: column; }
-            .task-item { flex-direction: column; align-items: flex-start; }
-            .task-actions { margin-top: 1rem; }
+            .add-task-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .deadline-inputs {
+                flex-direction: column;
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .task-actions {
+                width: 100%;
+                margin-top: 1rem;
+                justify-content: flex-end;
+            }
+
+            .targets-table td {
+                padding: 0.3rem;
+            }
+
+            .subject-progress {
+                width: 100px;
+            }
+
+            .progress-input {
+                width: 50px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="particles"></div>
+    <div class="particles" id="particles"></div>
     <div class="container main-content">
         <header>
-            <h1>Forest Quest<img src="https://pngimg.com/d/coin_PNG36871.png" alt="Coin" class="coin-icon"><img src="https://i.ytimg.com/vi/eTeBsgG3lkw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBsbiZakg7W-jPkhJtBh3mS2zeNrQ" alt="Leaf" class="leaf-icon"></h1>
-            <p>Grow your forest by completing tasks and earning rewards!</p>
+            <h1>Forest Quest<img src="https://i.ytimg.com/vi/eTeBsgG3lkw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBsbiZakg7W-jPkhJtBh3mS2zeNrQ" alt="Leaf" class="leaf-icon"></h1>
+            <p>Complete tasks, earn coins, level up, and transform your forest!</p>
         </header>
 
         <button class="signout-btn" id="signout-btn" style="display: none;">Sign Out</button>
 
         <div class="stats">
-            <div class="stat"><div>LEVEL</div><div class="stat-value" id="level">1</div></div>
-            <div class="stat"><div>COINS</div><div class="stat-value" id="coins">0</div></div>
-            <div class="stat"><div>TASKS DONE</div><div class="stat-value" id="tasks-completed">0</div></div>
+            <div class="stat">
+                <div>LEVEL</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+            <div class="stat">
+                <div><img src="https://pngimg.com/d/coin_PNG36871.png" alt="Coin" class="coin-icon"></div>
+                <div class="stat-value" id="coins">0</div>
+            </div>
+            <div class="stat">
+                <div>TASKS DONE</div>
+                <div class="stat-value" id="tasks-completed">0</div>
+            </div>
         </div>
 
         <div>
             <div>Level Progress</div>
-            <div class="level-progress"><div class="progress-bar" id="level-progress-bar" style="width: 0%"></div></div>
+            <div class="level-progress">
+                <div class="progress-bar" id="level-progress-bar" style="width: 0%"></div>
+            </div>
         </div>
 
-        <form id="add-task-form" class="add-task-form">
-            <div class="form-group">
-                <label for="task-name">Task Name:</label>
-                <input type="text" id="task-name" required placeholder="Enter task...">
-            </div>
-            <div class="form-group">
-                <label for="deadline-date">Deadline:</label>
-                <div class="deadline-inputs">
-                    <input type="date" id="deadline-date" required>
-                    <input type="time" id="deadline-time" required>
+        <div class="add-task">
+            <h2>Add New Task</h2>
+            <form id="add-task-form" class="add-task-form">
+                <div class="form-group">
+                    <label for="task-name">Task Name:</label>
+                    <input type="text" id="task-name" required placeholder="Enter task name...">
                 </div>
-            </div>
-            <button type="submit">Add Task</button>
-        </form>
+
+                <div class="form-group">
+                    <label for="deadline-date">Deadline:</label>
+                    <div class="deadline-inputs">
+                        <input type="date" id="deadline-date" required>
+                        <input type="time" id="deadline-time" required>
+                    </div>
+                </div>
+
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
 
         <button class="targets-btn" id="targets-btn">Targets</button>
 
         <div>
             <h2>Tasks</h2>
             <ul id="task-list" class="task-list">
-                <div class="empty-state" id="empty-tasks">No tasks yet—add one to begin!</div>
+                <div class="empty-state" id="empty-tasks">
+                    <p>You have no tasks yet. Add a task to get started!</p>
+                </div>
             </ul>
         </div>
     </div>
 
     <div class="level-up" id="level-up-popup">
         <h2>Level Up!</h2>
-        <p>You’ve reached Level <span id="new-level">2</span>!</p>
-        <p>Your forest flourishes...</p>
+        <p>You've reached Level <span id="new-level">2</span>!</p>
+        <p>Your forest is growing and transforming...</p>
         <button id="level-up-ok">Continue</button>
     </div>
 
     <div class="targets-popup" id="targets-popup">
-        <button class="targets-close" id="targets-close">×</button>
+        <button class="targets-close" id="targets-close">X</button>
         <table class="targets-table">
             <tbody>
+                <!-- Class 11 -->
                 <tr class="class-row"><td colspan="3">Class 11</td></tr>
+                <!-- Physics -->
                 <tr class="subject-row"><td colspan="3">Physics</td></tr>
-                <tr class="topic-row"><td>Physical World</td><td><div class="subject-progress" data-subject="Physical World"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
-                <!-- Add more topics as needed -->
+                <tr class="topic-row"><td>Physical World and Measurement</td><td><div class="subject-progress" data-subject="Physical World and Measurement"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Kinematics</td><td><div class="subject-progress" data-subject="Kinematics"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Laws of Motion</td><td><div class="subject-progress" data-subject="Laws of Motion"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Work, Energy and Power</td><td><div class="subject-progress" data-subject="Work, Energy and Power"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Motion of System of Particles and Rigid Body</td><td><div class="subject-progress" data-subject="Motion of System of Particles and Rigid Body"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Gravitation</td><td><div class="subject-progress" data-subject="Gravitation"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Properties of Bulk Matter</td><td><div class="subject-progress" data-subject="Properties of Bulk Matter"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Thermodynamics</td><td><div class="subject-progress" data-subject="Thermodynamics (Physics Class 11)"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Behavior of Perfect Gas and Kinetic Theory</td><td><div class="subject-progress" data-subject="Behavior of Perfect Gas and Kinetic Theory"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Oscillations and Waves</td><td><div class="subject-progress" data-subject="Oscillations and Waves"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <!-- Chemistry -->
+                <tr class="subject-row"><td colspan="3">Chemistry</td></tr>
+                <tr class="topic-row"><td>Some Basic Concepts of Chemistry</td><td><div class="subject-progress" data-subject="Some Basic Concepts of Chemistry"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Structure of Atom</td><td><div class="subject-progress" data-subject="Structure of Atom"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Classification of Elements and Periodicity in Properties</td><td><div class="subject-progress" data-subject="Classification of Elements and Periodicity in Properties"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Chemical Bonding and Molecular Structure</td><td><div class="subject-progress" data-subject="Chemical Bonding and Molecular Structure"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>States of Matter: Gases and Liquids</td><td><div class="subject-progress" data-subject="States of Matter: Gases and Liquids"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Thermodynamics</td><td><div class="subject-progress" data-subject="Thermodynamics (Chemistry Class 11)"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Equilibrium</td><td><div class="subject-progress" data-subject="Equilibrium"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Redox Reactions</td><td><div class="subject-progress" data-subject="Redox Reactions"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Hydrogen</td><td><div class="subject-progress" data-subject="Hydrogen"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>s-Block Element (Alkali and Alkaline earth metals)</td><td><div class="subject-progress" data-subject="s-Block Element (Alkali and Alkaline earth metals)"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Some p-Block Elements</td><td><div class="subject-progress" data-subject="Some p-Block Elements"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Organic Chemistry - Some Basic Principles and Techniques</td><td><div class="subject-progress" data-subject="Organic Chemistry - Some Basic Principles and Techniques"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Hydrocarbons</td><td><div class="subject-progress" data-subject="Hydrocarbons"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Environmental Chemistry</td><td><div class="subject-progress" data-subject="Environmental Chemistry"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <!-- Mathematics -->
+                <tr class="subject-row"><td colspan="3">Mathematics</td></tr>
+                <tr class="topic-row"><td>Sets and Functions</td><td><div class="subject-progress" data-subject="Sets and Functions"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Trigonometric Functions</td><td><div class="subject-progress" data-subject="Trigonometric Functions"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Complex Numbers and Quadratic Equations</td><td><div class="subject-progress" data-subject="Complex Numbers and Quadratic Equations"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Linear Inequalities</td><td><div class="subject-progress" data-subject="Linear Inequalities"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Permutations and Combinations</td><td><div class="subject-progress" data-subject="Permutations and Combinations (Class 11)"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Binomial Theorem</td><td><div class="subject-progress" data-subject="Binomial Theorem"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Sequences and Series</td><td><div class="subject-progress" data-subject="Sequences and Series"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Straight Lines</td><td><div class="subject-progress" data-subject="Straight Lines"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Conic Sections</td><td><div class="subject-progress" data-subject="Conic Sections"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Introduction to Three-Dimensional Geometry</td><td><div class="subject-progress" data-subject="Introduction to Three-Dimensional Geometry"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Limits and Derivatives</td><td><div class="subject-progress" data-subject="Limits and Derivatives"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Mathematical Reasoning</td><td><div class="subject-progress" data-subject="Mathematical Reasoning"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Statistics and Probability</td><td><div class="subject-progress" data-subject="Statistics and Probability (Class 11)"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Mathematical Induction</td><td><div class="subject-progress" data-subject="Mathematical Induction"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <!-- Class 12 -->
+                <tr class="class-row"><td colspan="3">Class 12</td></tr>
+                <!-- Physics -->
+                <tr class="subject-row"><td colspan="3">Physics</td></tr>
+                <tr class="topic-row"><td>Electrostatics</td><td><div class="subject-progress" data-subject="Electrostatics"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Current Electricity</td><td><div class="subject-progress" data-subject="Current Electricity"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Magnetic Effects of Current and Magnetism</td><td><div class="subject-progress" data-subject="Magnetic Effects of Current and Magnetism"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Electromagnetic Induction and Alternating Currents</td><td><div class="subject-progress" data-subject="Electromagnetic Induction and Alternating Currents"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Electromagnetic Waves</td><td><div class="subject-progress" data-subject="Electromagnetic Waves"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Optics</td><td><div class="subject-progress" data-subject="Optics"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Dual Nature of Matter and Radiation</td><td><div class="subject-progress" data-subject="Dual Nature of Matter and Radiation"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Atoms and Nuclei</td><td><div class="subject-progress" data-subject="Atoms and Nuclei"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Electronic Devices</td><td><div class="subject-progress" data-subject="Electronic Devices"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <!-- Chemistry -->
+                <tr class="subject-row"><td colspan="3">Chemistry</td></tr>
+                <tr class="topic-row"><td>Solid State</td><td><div class="subject-progress" data-subject="Solid State"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Solutions</td><td><div class="subject-progress" data-subject="Solutions"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Electrochemistry</td><td><div class="subject-progress" data-subject="Electrochemistry"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Chemical Kinetics</td><td><div class="subject-progress" data-subject="Chemical Kinetics"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Surface Chemistry</td><td><div class="subject-progress" data-subject="Surface Chemistry"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>General Principles and Processes of Isolation of Elements</td><td><div class="subject-progress" data-subject="General Principles and Processes of Isolation of Elements"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>p-Block Elements</td><td><div class="subject-progress" data-subject="p-Block Elements"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>d and f Block Elements</td><td><div class="subject-progress" data-subject="d and f Block Elements"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Coordination Compounds</td><td><div class="subject-progress" data-subject="Coordination Compounds"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Haloalkanes and Haloarenes</td><td><div class="subject-progress" data-subject="Haloalkanes and Haloarenes"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Alcohols, Phenols and Ethers</td><td><div class="subject-progress" data-subject="Alcohols, Phenols and Ethers"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Aldehydes, Ketones and Carboxylic Acids</td><td><div class="subject-progress" data-subject="Aldehydes, Ketones and Carboxylic Acids"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Organic Compounds Containing Nitrogen</td><td><div class="subject-progress" data-subject="Organic Compounds Containing Nitrogen"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Biomolecules</td><td><div class="subject-progress" data-subject="Biomolecules"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Polymers</td><td><div class="subject-progress" data-subject="Polymers"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Chemistry in Everyday Life</td><td><div class="subject-progress" data-subject="Chemistry in Everyday Life"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <!-- Mathematics -->
+                <tr class="subject-row"><td colspan="3">Mathematics</td></tr>
+                <tr class="topic-row"><td>Relations and Functions</td><td><div class="subject-progress" data-subject="Relations and Functions"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Inverse Trigonometric Functions</td><td><div class="subject-progress" data-subject="Inverse Trigonometric Functions"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Matrices and Determinants</td><td><div class="subject-progress" data-subject="Matrices and Determinants"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Continuity and Differentiability</td><td><div class="subject-progress" data-subject="Continuity and Differentiability"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Application of Derivatives</td><td><div class="subject-progress" data-subject="Application of Derivatives"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Integrals</td><td><div class="subject-progress" data-subject="Integrals"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Applications of Integrals</td><td><div class="subject-progress" data-subject="Applications of Integrals"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Differential Equations</td><td><div class="subject-progress" data-subject="Differential Equations"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Vectors</td><td><div class="subject-progress" data-subject="Vectors"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Three-Dimensional Geometry</td><td><div class="subject-progress" data-subject="Three-Dimensional Geometry"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Linear Programming</td><td><div class="subject-progress" data-subject="Linear Programming"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
+                <tr class="topic-row"><td>Probability</td><td><div class="subject-progress" data-subject="Probability"><div class="subject-progress-bar"></div></div></td><td><input type="text" class="progress-input" placeholder="0Q"></td></tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="graph-sidebar" id="graph-sidebar">
+        <h2 class="graph-title">TEST GRAPH</h2>
+        <div class="graph-container">
+            <canvas id="marksGraph"></canvas>
+        </div>
+        <button class="add-marks-btn" id="add-marks-btn">+</button>
+    </div>
+
+    <div class="marks-input-popup" id="marks-input-popup">
+        <label for="marks-name">Test Name:</label>
+        <input type="text" id="marks-name" placeholder="Enter test name...">
+        <label for="marks-input">Enter your Marks (out of 300):</label>
+        <input type="number" id="marks-input" min="0" max="300" placeholder="Enter marks...">
+        <button id="submit-marks-btn">Submit</button>
+        <button id="cancel-marks-btn" style="background-color: var(--delete-color); margin-top: 0.5rem;">Cancel</button>
     </div>
 
     <div class="signin-overlay" id="signin-overlay">
@@ -527,319 +859,679 @@
             <input type="password" id="password" placeholder="Password" required>
             <label><input type="checkbox" id="stay-signed-in"> Stay Signed In</label>
             <button id="signin-btn">Sign In</button>
-            <p class="signin-error" id="signin-error" style="display: none;">Invalid credentials</p>
+            <p class="signin-error" id="signin-error">Invalid username or password</p>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Game State
-            let gameState = { coins: 0, level: 1, tasksCompleted: 0, tasks: new Map() };
+        document.addEventListener('DOMContentLoaded', function() {
+            let gameState = {
+                coins: 0,
+                level: 1,
+                tasksCompleted: 0,
+                tasks: new Map()
+            };
+
             let subjectProgress = new Map();
             let currentUser = null;
 
-            // DOM Elements
-            const elements = {
-                coins: document.getElementById('coins'),
-                level: document.getElementById('level'),
-                tasksCompleted: document.getElementById('tasks-completed'),
-                progressBar: document.getElementById('level-progress-bar'),
-                taskList: document.getElementById('task-list'),
-                emptyTasks: document.getElementById('empty-tasks'),
-                addTaskForm: document.getElementById('add-task-form'),
-                taskName: document.getElementById('task-name'),
-                deadlineDate: document.getElementById('deadline-date'),
-                deadlineTime: document.getElementById('deadline-time'),
-                levelUpPopup: document.getElementById('level-up-popup'),
-                newLevel: document.getElementById('new-level'),
-                levelUpOk: document.getElementById('level-up-ok'),
-                targetsBtn: document.getElementById('targets-btn'),
-                targetsPopup: document.getElementById('targets-popup'),
-                targetsClose: document.getElementById('targets-close'),
-                signinOverlay: document.getElementById('signin-overlay'),
-                signinBtn: document.getElementById('signin-btn'),
-                username: document.getElementById('username'),
-                password: document.getElementById('password'),
-                staySignedIn: document.getElementById('stay-signed-in'),
-                signinError: document.getElementById('signin-error'),
-                mainContent: document.querySelector('.main-content'),
-                signoutBtn: document.getElementById('signout-btn')
-            };
+            const coinsElement = document.getElementById('coins');
+            const levelElement = document.getElementById('level');
+            const tasksCompletedElement = document.getElementById('tasks-completed');
+            const progressBarElement = document.getElementById('level-progress-bar');
+            const taskListElement = document.getElementById('task-list');
+            const emptyTasksElement = document.getElementById('empty-tasks');
+            const addTaskForm = document.getElementById('add-task-form');
+            const taskNameInput = document.getElementById('task-name');
+            const deadlineDateInput = document.getElementById('deadline-date');
+            const deadlineTimeInput = document.getElementById('deadline-time');
+            const levelUpPopup = document.getElementById('level-up-popup');
+            const newLevelElement = document.getElementById('new-level');
+            const levelUpOkButton = document.getElementById('level-up-ok');
+            const targetsBtn = document.getElementById('targets-btn');
+            const targetsPopup = document.getElementById('targets-popup');
+            const targetsClose = document.getElementById('targets-close');
+            const signinOverlay = document.getElementById('signin-overlay');
+            const signinBtn = document.getElementById('signin-btn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const staySignedInCheckbox = document.getElementById('stay-signed-in');
+            const signinError = document.getElementById('signin-error');
+            const mainContent = document.querySelector('.main-content');
+            const signoutBtn = document.getElementById('signout-btn');
+
+            const graphSidebar = document.getElementById('graph-sidebar');
+            const addMarksBtn = document.getElementById('add-marks-btn');
+            const marksInputPopup = document.getElementById('marks-input-popup');
+            const marksInput = document.getElementById('marks-input');
+            const submitMarksBtn = document.getElementById('submit-marks-btn');
+            const cancelMarksBtn = document.getElementById('cancel-marks-btn');
 
             const backgroundImages = {
                 0: 'https://assets.grok.com/users/61aa03d5-34a6-451f-a29b-c678af050623/7qqe1265AFQU0oyA-generated_image.jpg',
                 1: 'https://ih1.redbubble.net/image.4971990187.8956/raf,360x360,075,t,fafafa:ca443f4786.jpg',
                 2: 'https://wallpapers.com/images/hd/lo-fi-anime-chill-zpbeiv7k1y45zwat.jpg',
-                3: 'https://i.ytimg.com/vi/KAqUpjcs_xc/hq720.jpg',
+                3: 'https://i.ytimg.com/vi/KAqUpjcs_xc/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYAC0AWKAgwIABABGC8gZChyMA8=&rs=AOn4CLBREcqsX48B9zFgdfrQuGwurotqrg',
                 4: 'https://i1.sndcdn.com/artworks-G9UzrSoAlsn4Ed7i-AAjR3Q-t500x500.jpg',
                 5: 'https://i1.sndcdn.com/artworks-RqAOy7Z3ktf3xBLd-5KXuqA-t500x500.jpg'
             };
 
             let intervalId = null;
 
-            // Particle Effect
-            const particlesDiv = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.animationDelay = `${Math.random() * 8}s`;
-                particlesDiv.appendChild(particle);
+            let marksData = {
+                labels: [],
+                datasets: [{
+                    label: 'Marks',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: 5,
+                    pointHoverRadius: 8
+                }]
+            };
+
+            const ctx = document.getElementById('marksGraph').getContext('2d');
+            const marksChart = new Chart(ctx, {
+                type: 'line',
+                data: marksData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 300,
+                            title: {
+                                display: true,
+                                text: 'Marks',
+                                color: '#FFFFFF'
+                            },
+                            ticks: {
+                                color: '#FFFFFF'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Test',
+                                color: '#FFFFFF'
+                            },
+                            ticks: {
+                                color: '#FFFFFF'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#FFFFFF'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Marks: ${context.parsed.y} (${marksData.labels[context.dataIndex]})`;
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            showDeleteButton(index);
+                        }
+                    }
+                }
+            });
+
+            // Particle Effect Initialization
+            function createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = 30;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    const x = Math.random() * window.innerWidth;
+                    const delay = Math.random() * 5;
+                    const duration = 5 + Math.random() * 5;
+                    
+                    particle.style.left = `${x}px`;
+                    particle.style.animationDelay = `${delay}s`;
+                    particle.style.animationDuration = `${duration}s`;
+                    
+                    particlesContainer.appendChild(particle);
+                }
             }
 
-            // User Management
-            const loadUsers = () => JSON.parse(localStorage.getItem('forestQuestUsers')) || {};
-            const saveUsers = users => localStorage.setItem('forestQuestUsers', JSON.stringify(users));
-            const loadSignedInUser = () => localStorage.getItem('signedInUser');
-            const saveSignedInUser = username => localStorage.setItem('signedInUser', username);
-            const clearSignedInUser = () => localStorage.removeItem('signedInUser');
+            createParticles();
+
+            function loadUsers() {
+                const users = localStorage.getItem('forestQuestUsers');
+                return users ? JSON.parse(users) : {};
+            }
+
+            function saveUsers(users) {
+                localStorage.setItem('forestQuestUsers', JSON.stringify(users));
+            }
+
+            function loadSignedInUser() {
+                return localStorage.getItem('signedInUser');
+            }
+
+            function saveSignedInUser(username) {
+                localStorage.setItem('signedInUser', username);
+            }
+
+            function clearSignedInUser() {
+                localStorage.removeItem('signedInUser');
+            }
 
             function signIn(username, password, staySignedIn) {
                 const users = loadUsers();
-                if (users[username]?.password === password || !users[username]) {
-                    if (!users[username]) {
-                        users[username] = { password };
-                        saveUsers(users);
-                    }
+                if (users[username] && users[username].password === password) {
                     currentUser = username;
-                    if (staySignedIn) saveSignedInUser(username);
-                    elements.signinOverlay.classList.remove('show');
-                    elements.mainContent.classList.remove('blur');
-                    elements.signoutBtn.style.display = 'block';
+                    if (staySignedIn) {
+                        saveSignedInUser(username);
+                    }
+                    signinOverlay.style.display = 'none';
+                    mainContent.classList.remove('blur');
+                    signoutBtn.style.display = 'block';
                     loadGameState();
                     loadSubjectProgress();
+                    loadMarksData();
+                } else if (!users[username]) {
+                    users[username] = { password: password };
+                    saveUsers(users);
+                    currentUser = username;
+                    if (staySignedIn) {
+                        saveSignedInUser(username);
+                    }
+                    signinOverlay.style.display = 'none';
+                    mainContent.classList.remove('blur');
+                    signoutBtn.style.display = 'block';
+                    loadGameState();
+                    loadSubjectProgress();
+                    loadMarksData();
                 } else {
-                    elements.signinError.style.display = 'block';
+                    signinError.style.display = 'block';
                 }
             }
 
             function signOut() {
                 currentUser = null;
                 clearSignedInUser();
-                elements.signoutBtn.style.display = 'none';
-                elements.mainContent.classList.add('blur');
-                elements.signinOverlay.classList.add('show');
-                elements.username.value = '';
-                elements.password.value = '';
-                elements.staySignedIn.checked = false;
-                elements.signinError.style.display = 'none';
-                if (intervalId) clearInterval(intervalId);
+                signoutBtn.style.display = 'none';
+                mainContent.classList.add('blur');
+                signinOverlay.style.display = 'flex';
+                usernameInput.value = '';
+                passwordInput.value = '';
+                staySignedInCheckbox.checked = false;
+                signinError.style.display = 'none';
+                if (intervalId) {
+                    clearInterval(intervalId);
+                }
             }
 
-            elements.signinBtn.addEventListener('click', () => {
-                const username = elements.username.value.trim();
-                const password = elements.password.value.trim();
-                if (username && password) signIn(username, password, elements.staySignedIn.checked);
+            signinBtn.addEventListener('click', () => {
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+                const staySignedIn = staySignedInCheckbox.checked;
+                if (username && password) {
+                    signIn(username, password, staySignedIn);
+                }
             });
 
-            elements.signoutBtn.addEventListener('click', signOut);
+            signoutBtn.addEventListener('click', signOut);
 
-            // Game Logic
+            function loadSubjectProgress() {
+                if (!currentUser) return;
+                const savedProgress = localStorage.getItem(`subjectProgress_${currentUser}`);
+                if (savedProgress) {
+                    subjectProgress = new Map(JSON.parse(savedProgress));
+                }
+                updateSubjectProgressBars();
+            }
+
+            function saveSubjectProgress() {
+                if (!currentUser) return;
+                localStorage.setItem(`subjectProgress_${currentUser}`, JSON.stringify([...subjectProgress]));
+            }
+
+            function updateSubjectProgressBars() {
+                document.querySelectorAll('.subject-progress').forEach(progressBar => {
+                    const subject = progressBar.dataset.subject;
+                    const questionsDone = parseInt(subjectProgress.get(subject) || 0);
+                    const isClass11 = progressBar.closest('tr').previousElementSibling.previousElementSibling.classList.contains('class-row') && progressBar.closest('tr').previousElementSibling.previousElementSibling.textContent.includes('Class 11');
+                    const totalQuestions = isClass11 ? 112 : 196;
+                    const progressPercentage = Math.min((questionsDone / totalQuestions) * 100, 100);
+                    progressBar.querySelector('.subject-progress-bar').style.width = `${progressPercentage}%`;
+                    const input = progressBar.parentElement.nextElementSibling.querySelector('.progress-input');
+                    input.value = questionsDone > 0 ? `${questionsDone}Q` : '';
+                });
+            }
+
+            function handleProgressInput(event) {
+                const input = event.target;
+                const subject = input.closest('tr').querySelector('.subject-progress').dataset.subject;
+                let value = input.value.replace(/[^0-9]/g, '');
+                if (value === '') value = '0';
+                const questionsDone = parseInt(value);
+                subjectProgress.set(subject, questionsDone);
+                saveSubjectProgress();
+                updateSubjectProgressBars();
+            }
+
+            function loadMarksData() {
+                if (!currentUser) return;
+                const savedMarks = localStorage.getItem(`marksData_${currentUser}`);
+                if (savedMarks) {
+                    const parsedMarks = JSON.parse(savedMarks);
+                    marksData.labels = parsedMarks.labels;
+                    marksData.datasets[0].data = parsedMarks.data;
+                    marksChart.update();
+                }
+            }
+
+            function saveMarksData() {
+                if (!currentUser) return;
+                const dataToSave = {
+                    labels: marksData.labels,
+                    data: marksData.datasets[0].data
+                };
+                localStorage.setItem(`marksData_${currentUser}`, JSON.stringify(dataToSave));
+            }
+
             function loadGameState() {
                 if (!currentUser) return;
-                const savedState = JSON.parse(localStorage.getItem(`forestQuestState_${currentUser}`));
+                const savedState = localStorage.getItem(`forestQuestState_${currentUser}`);
                 if (savedState) {
-                    gameState = {
-                        coins: savedState.coins || 0,
-                        level: savedState.level || 1,
-                        tasksCompleted: savedState.tasksCompleted || 0,
-                        tasks: new Map(savedState.tasks?.map(t => [t.id, t]) || [])
-                    };
+                    const parsedState = JSON.parse(savedState);
+                    gameState.coins = parsedState.coins || 0;
+                    gameState.level = parsedState.level || 1;
+                    gameState.tasksCompleted = parsedState.tasksCompleted || 0;
+                    gameState.tasks = new Map();
+                    (parsedState.tasks || []).forEach(task => {
+                        if (task.id && !gameState.tasks.has(task.id)) {
+                            gameState.tasks.set(task.id, task);
+                        }
+                    });
                 }
                 updateUI();
                 updateBackground();
                 renderTasks();
-                if (intervalId) clearInterval(intervalId);
-                intervalId = setInterval(checkDeadlines, 30000); // Reduced interval for better responsiveness
+                loadMarksData();
+
+                if (intervalId) {
+                    clearInterval(intervalId);
+                }
+                intervalId = setInterval(checkDeadlines, 60000);
             }
 
             function saveGameState() {
                 if (!currentUser) return;
-                localStorage.setItem(`forestQuestState_${currentUser}`, JSON.stringify({
+                const stateToSave = {
                     coins: gameState.coins,
                     level: gameState.level,
                     tasksCompleted: gameState.tasksCompleted,
                     tasks: Array.from(gameState.tasks.values())
-                }));
+                };
+                localStorage.setItem(`forestQuestState_${currentUser}`, JSON.stringify(stateToSave));
             }
 
             function updateUI() {
-                elements.coins.textContent = gameState.coins;
-                elements.level.textContent = gameState.level;
-                elements.tasksCompleted.textContent = gameState.tasksCompleted;
+                coinsElement.textContent = gameState.coins;
+                levelElement.textContent = gameState.level;
+                tasksCompletedElement.textContent = gameState.tasksCompleted;
                 const progress = (gameState.coins % 1000) / 10;
-                elements.progressBar.style.width = `${Math.min(progress, 100)}%`;
+                progressBarElement.style.width = `${progress}%`;
             }
 
             function updateBackground() {
-                document.body.style.backgroundImage = `url('${backgroundImages[Math.min(gameState.level, 5)]}')`;
+                document.body.style.backgroundImage = `url('${backgroundImages[gameState.level > 5 ? 5 : gameState.level]}')`;
             }
 
             function generateTaskId() {
-                return `${Date.now().toString(36)}${Math.random().toString(36).substr(2, 5)}`;
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
             }
 
             function formatDateTime(date) {
-                return new Date(date).toLocaleString('en-US', {
-                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                return new Date(date).toLocaleString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
             }
 
+            function isUrgent(deadline) {
+                const now = new Date();
+                const deadlineDate = new Date(deadline);
+                return (deadlineDate - now) < 3600000 && (deadlineDate - now) > 0;
+            }
+
+            function isPastDeadline(deadline) {
+                const now = new Date();
+                const deadlineDate = new Date(deadline);
+                return now > deadlineDate;
+            }
+
             function calculateTaskProgress(deadline, created) {
-                const now = Date.now();
+                const now = new Date().getTime();
                 const deadlineDate = new Date(deadline).getTime();
                 const createdDate = new Date(created).getTime();
-                const progress = ((now - createdDate) / (deadlineDate - createdDate)) * 100;
-                return Math.min(Math.max(progress, 0), 100);
+                
+                const totalDuration = deadlineDate - createdDate;
+                const elapsed = now - createdDate;
+                const progress = (totalDuration - (deadlineDate - now)) / totalDuration * 100;
+                
+                if (deadlineDate < now) return 100;
+                if (totalDuration <= 0) return 0;
+                
+                return Math.max(0, Math.min(100, progress));
             }
 
             function renderTasks() {
-                elements.taskList.innerHTML = gameState.tasks.size === 0 ? '' : '';
-                elements.emptyTasks.style.display = gameState.tasks.size === 0 ? 'block' : 'none';
+                if (gameState.tasks.size === 0) {
+                    emptyTasksElement.style.display = 'block';
+                } else {
+                    emptyTasksElement.style.display = 'none';
+                }
 
-                const fragment = document.createDocumentFragment();
-                Array.from(gameState.tasks.values())
-                    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-                    .forEach(task => {
-                        const isOverdue = new Date(task.deadline) < new Date();
-                        const progress = calculateTaskProgress(task.deadline, task.created);
+                while (taskListElement.firstChild) {
+                    if (taskListElement.firstChild !== emptyTasksElement) {
+                        taskListElement.removeChild(taskListElement.firstChild);
+                    } else {
+                        break;
+                    }
+                }
+
+                const sortedTasks = Array.from(gameState.tasks.values()).sort((a, b) => {
+                    return new Date(a.deadline) - new Date(b.deadline);
+                });
+
+                sortedTasks.forEach(task => {
+                    if (!taskListElement.querySelector(`[data-id="${task.id}"]`)) {
                         const taskItem = document.createElement('li');
-                        taskItem.className = `task-item ${isOverdue ? 'overdue' : ''}`;
+                        taskItem.className = 'task-item';
                         taskItem.dataset.id = task.id;
+                        if (isPastDeadline(task.deadline)) {
+                            taskItem.classList.add('overdue');
+                        }
+
+                        const deadlineClass = isUrgent(task.deadline) ? 'urgent' : '';
+                        const isPast = isPastDeadline(task.deadline);
+                        const progress = calculateTaskProgress(task.deadline, task.created);
+
                         taskItem.innerHTML = `
                             <div class="task-details">
                                 <div class="task-name">${task.name}</div>
-                                <div class="task-deadline ${isOverdue ? 'urgent' : ''}">
-                                    ${isOverdue ? '⚠️ Overdue: ' : 'Due: '}${formatDateTime(task.deadline)}
+                                <div class="task-deadline ${deadlineClass}">
+                                    ${isPast ? '⚠️ OVERDUE: ' : ''}Due: ${formatDateTime(task.deadline)}
                                 </div>
                                 <div class="task-progress">
                                     <div class="task-progress-bar" style="width: ${progress}%"></div>
                                 </div>
                             </div>
                             <div class="task-actions">
-                                <button class="complete-btn">✓</button>
-                                <button class="delete-btn">✗</button>
+                                <button class="complete-btn">✓ Complete</button>
+                                <button class="delete-btn">Delete</button>
                             </div>
                         `;
-                        taskItem.querySelector('.complete-btn').addEventListener('click', () => completeTask(task.id));
-                        taskItem.querySelector('.delete-btn').addEventListener('click', () => deleteTask(task.id));
-                        fragment.appendChild(taskItem);
-                    });
-                elements.taskList.appendChild(fragment);
+
+                        taskListElement.appendChild(taskItem);
+
+                        const completeBtn = taskItem.querySelector('.complete-btn');
+                        const deleteBtn = taskItem.querySelector('.delete-btn');
+
+                        completeBtn.addEventListener('click', () => completeTask(task.id));
+                        deleteBtn.addEventListener('click', () => deleteTask(task.id));
+                    }
+                });
             }
 
             function addTask(name, deadline) {
                 const id = generateTaskId();
-                if (gameState.tasks.has(id) || Array.from(gameState.tasks.values()).some(t => t.name === name && t.deadline === deadline)) return;
-                gameState.tasks.set(id, { id, name, deadline, created: new Date().toISOString() });
+                if (gameState.tasks.has(id)) return;
+
+                const taskExists = Array.from(gameState.tasks.values()).some(task => 
+                    task.name === name && task.deadline === deadline
+                );
+                if (taskExists) return;
+
+                const newTask = {
+                    id: id,
+                    name: name,
+                    deadline: deadline,
+                    created: new Date().toISOString()
+                };
+
+                gameState.tasks.set(id, newTask);
                 saveGameState();
                 renderTasks();
             }
 
             function completeTask(taskId) {
                 if (!gameState.tasks.has(taskId)) return;
+
                 gameState.tasks.delete(taskId);
-                gameState.coins += 100;
+                addCoins(100);
                 gameState.tasksCompleted++;
-                checkLevelUp();
+
                 saveGameState();
                 renderTasks();
                 updateUI();
             }
 
             function deleteTask(taskId) {
+                if (!gameState.tasks.has(taskId)) return;
+
                 gameState.tasks.delete(taskId);
                 saveGameState();
                 renderTasks();
             }
 
-            function checkLevelUp() {
-                const newLevel = Math.floor(gameState.coins / 1000) + 1;
-                if (newLevel > gameState.level) {
-                    gameState.level = newLevel;
-                    elements.newLevel.textContent = newLevel;
-                    elements.levelUpPopup.classList.add('show');
-                    updateBackground();
+            function addCoins(amount) {
+                gameState.coins += amount;
+                coinsElement.classList.add('coin-animation');
+                
+                const previousLevel = gameState.level;
+                gameState.level = Math.floor(gameState.coins / 1000) + 1;
+                
+                if (gameState.level > previousLevel) {
+                    showLevelUp(gameState.level);
                 }
+                
+                setTimeout(() => {
+                    coinsElement.classList.remove('coin-animation');
+                }, 500);
+                saveGameState();
+                updateUI();
+            }
+
+            function removeCoins(amount) {
+                gameState.coins = Math.max(0, gameState.coins - amount);
+                saveGameState();
+                updateUI();
+            }
+
+            function showLevelUp(newLevel) {
+                newLevelElement.textContent = newLevel;
+                levelUpPopup.style.display = 'block';
+                updateBackground();
             }
 
             function checkDeadlines() {
                 let penalty = false;
-                for (const task of gameState.tasks.values()) {
-                    if (new Date(task.deadline) < new Date()) penalty = true;
+                
+                for (let [id, task] of gameState.tasks) {
+                    if (isPastDeadline(task.deadline)) {
+                        penalty = true;
+                    }
                 }
-                if (penalty) gameState.coins = Math.max(0, gameState.coins - 50);
-                saveGameState();
-                updateUI();
+                
+                if (penalty) {
+                    removeCoins(50);
+                    updateUI();
+                }
+                
                 renderTasks();
             }
 
-            // Subject Progress
-            function loadSubjectProgress() {
-                if (!currentUser) return;
-                const saved = JSON.parse(localStorage.getItem(`subjectProgress_${currentUser}`));
-                if (saved) subjectProgress = new Map(saved);
-                updateSubjectProgressBars();
-            }
+            function showDeleteButton(index) {
+                const existingButton = document.querySelector('.delete-graph-point');
+                if (existingButton) existingButton.remove();
 
-            function saveSubjectProgress() {
-                if (!currentUser) localStorage.setItem(`subjectProgress_${currentUser}`, JSON.stringify([...subjectProgress]));
-            }
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete Point';
+                deleteBtn.className = 'delete-graph-point';
+                deleteBtn.style.position = 'absolute';
+                deleteBtn.style.backgroundColor = 'var(--delete-color)';
+                deleteBtn.style.padding = '0.5rem 1rem';
+                deleteBtn.style.border = 'none';
+                deleteBtn.style.borderRadius = '5px';
+                deleteBtn.style.cursor = 'pointer';
+                deleteBtn.style.zIndex = '104';
 
-            function updateSubjectProgressBars() {
-                document.querySelectorAll('.subject-progress').forEach(bar => {
-                    const subject = bar.dataset.subject;
-                    const progress = (subjectProgress.get(subject) || 0) / 112 * 100; // Assuming 112 questions per topic
-                    bar.querySelector('.subject-progress-bar').style.width = `${Math.min(progress, 100)}%`;
-                    const input = bar.parentElement.nextElementSibling.querySelector('.progress-input');
-                    input.value = subjectProgress.get(subject) || '';
+                const canvas = document.getElementById('marksGraph');
+                const rect = canvas.getBoundingClientRect();
+                const x = marksChart.getDatasetMeta(0).data[index].x + rect.left;
+                const y = marksChart.getDatasetMeta(0).data[index].y + rect.top;
+                deleteBtn.style.left = `${x}px`;
+                deleteBtn.style.top = `${y - 40}px`;
+
+                deleteBtn.addEventListener('click', () => {
+                    marksData.labels.splice(index, 1);
+                    marksData.datasets[0].data.splice(index, 1);
+                    marksChart.update();
+                    saveMarksData();
+                    deleteBtn.remove();
                 });
+
+                document.body.appendChild(deleteBtn);
+
+                document.addEventListener('click', function handler(e) {
+                    if (!deleteBtn.contains(e.target) && e.target !== canvas) {
+                        deleteBtn.remove();
+                        document.removeEventListener('click', handler);
+                    }
+                }, { once: true });
             }
 
-            document.querySelectorAll('.progress-input').forEach(input => {
-                input.addEventListener('input', e => {
-                    const subject = e.target.closest('tr').querySelector('.subject-progress').dataset.subject;
-                    const value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-                    subjectProgress.set(subject, value);
-                    saveSubjectProgress();
-                    updateSubjectProgressBars();
-                });
-            });
-
-            // Event Listeners
-            elements.addTaskForm.addEventListener('submit', e => {
-                e.preventDefault();
-                const name = elements.taskName.value.trim();
-                const deadline = new Date(`${elements.deadlineDate.value}T${elements.deadlineTime.value}`).toISOString();
-                if (name && deadline) {
-                    addTask(name, deadline);
-                    elements.taskName.value = '';
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 't') {
+                    graphSidebar.classList.toggle('open');
+                    const existingButton = document.querySelector('.delete-graph-point');
+                    if (existingButton) existingButton.remove();
                 }
             });
 
-            elements.levelUpOk.addEventListener('click', () => elements.levelUpPopup.classList.remove('show'));
-            elements.targetsBtn.addEventListener('click', () => elements.targetsPopup.classList.add('show'));
-            elements.targetsClose.addEventListener('click', () => elements.targetsPopup.classList.remove('show'));
+            addMarksBtn.addEventListener('click', () => {
+                marksInputPopup.style.display = 'block';
+                marksInput.value = '';
+                document.getElementById('marks-name').value = '';
+            });
 
-            // Initialization
+            submitMarksBtn.addEventListener('click', () => {
+                const marks = parseInt(marksInput.value);
+                const testName = document.getElementById('marks-name').value.trim() || new Date().toLocaleDateString();
+                if (marks >= 0 && marks <= 300) {
+                    marksData.labels.push(testName);
+                    marksData.datasets[0].data.push(marks);
+                    marksChart.update();
+                    saveMarksData();
+                    marksInputPopup.style.display = 'none';
+                    document.getElementById('marks-name').value = '';
+                    marksInput.value = '';
+                } else {
+                    alert('Please enter marks between 0 and 300');
+                }
+            });
+
+            cancelMarksBtn.addEventListener('click', () => {
+                marksInputPopup.style.display = 'none';
+                document.getElementById('marks-name').value = '';
+                marksInput.value = '';
+            });
+
+            targetsBtn.addEventListener('click', () => {
+                targetsPopup.style.display = 'block';
+            });
+
+            targetsClose.addEventListener('click', () => {
+                targetsPopup.style.display = 'none';
+            });
+
+            document.querySelectorAll('.progress-input').forEach(input => {
+                input.addEventListener('input', handleProgressInput);
+                input.addEventListener('blur', handleProgressInput);
+            });
+
+            addTaskForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = taskNameInput.value.trim();
+                const deadlineDate = deadlineDateInput.value;
+                const deadlineTime = deadlineTimeInput.value;
+                
+                if (!name || !deadlineDate || !deadlineTime) return;
+                
+                const deadline = new Date(`${deadlineDate}T${deadlineTime}`).toISOString();
+                
+                addTask(name, deadline);
+                
+                taskNameInput.value = '';
+                
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                deadlineDateInput.value = tomorrow.toISOString().split('T')[0];
+            });
+
+            levelUpOkButton.addEventListener('click', function() {
+                levelUpPopup.style.display = 'none';
+            });
+
             const today = new Date();
-            elements.deadlineDate.value = today.toISOString().split('T')[0];
-            elements.deadlineTime.value = '23:59';
+            deadlineDateInput.value = today.toISOString().split('T')[0];
+            deadlineTimeInput.value = '23:59';
 
             const signedInUser = loadSignedInUser();
             if (signedInUser) {
                 currentUser = signedInUser;
-                elements.signinOverlay.classList.remove('show');
-                elements.mainContent.classList.remove('blur');
-                elements.signoutBtn.style.display = 'block';
+                signinOverlay.style.display = 'none';
+                mainContent.classList.remove('blur');
+                signoutBtn.style.display = 'block';
                 loadGameState();
                 loadSubjectProgress();
+                loadMarksData();
             } else {
-                elements.mainContent.classList.add('blur');
-                elements.signinOverlay.classList.add('show');
+                mainContent.classList.add('blur');
+                signinOverlay.style.display = 'flex';
             }
+
+            window.addEventListener('beforeunload', () => {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                }
+            });
+
+            // Recreate particles on window resize
+            window.addEventListener('resize', () => {
+                const particlesContainer = document.getElementById('particles');
+                particlesContainer.innerHTML = '';
+                createParticles();
+            });
         });
     </script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91ad769bcb1453ee',t:'MTc0MTA1MDMwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
