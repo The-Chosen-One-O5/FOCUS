@@ -111,22 +111,62 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .leaf-particle {
+        .particle {
             position: absolute;
             pointer-events: none;
-            animation: fall 8s linear infinite;
             z-index: 1;
-            color: #a5d6a7;
-            font-size: 24px;
         }
 
-        @keyframes fall {
+        .leaf-particle {
+            color: #a5d6a7;
+            font-size: 24px;
+            animation: fallLeaf 8s linear infinite;
+        }
+
+        .rain-particle {
+            width: 2px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            animation: fallRain 1s linear infinite;
+        }
+
+        .snow-particle {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: fallSnow 10s linear infinite;
+        }
+
+        @keyframes fallLeaf {
             0% {
                 transform: translateY(-100vh) rotate(0deg);
                 opacity: 0.8;
             }
             100% {
                 transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fallRain {
+            0% {
+                transform: translateY(-100vh);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes fallSnow {
+            0% {
+                transform: translateY(-100vh) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(${Math.random() * 100 - 50}px);
                 opacity: 0;
             }
         }
@@ -145,6 +185,16 @@
         .mode-label:hover {
             background: rgba(255,255,255,0.35);
         }
+
+        .effect-label {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 25px;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -155,6 +205,7 @@
     </div>
     <div class="container">
         <div class="mode-label">Pomodoro Mode</div>
+        <div class="effect-label" id="effectLabel">Leaf Effect</div>
         <div class="timer-display" id="timer">25:00</div>
         <div class="controls">
             <button onclick="startTimer()">Start</button>
@@ -177,6 +228,11 @@
         let isPomodoro = true;
         const timerDisplay = document.getElementById('timer');
         const modeLabel = document.querySelector('.mode-label');
+        const effectLabel = document.getElementById('effectLabel');
+        
+        // Particle effect states
+        const effects = ['leaf', 'rain', 'snow'];
+        let currentEffectIndex = 0;
 
         // Timer functions
         function updateTimer() {
@@ -215,7 +271,7 @@
             updateTimer();
         }
 
-        // Background toggle
+        // Background toggle (Q key)
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'q') {
                 currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
@@ -227,20 +283,60 @@
             }
         });
 
-        // Particle effects (falling leaves with LineIcons)
+        // Effect toggle (T key)
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 't') {
+                currentEffectIndex = (currentEffectIndex + 1) % effects.length;
+                effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
+            }
+        });
+
+        // Particle creation functions
         function createLeaf() {
             const leaf = document.createElement('i');
-            leaf.className = 'lni lni-leaf leaf-particle'; // Using LineIcons leaf icon
+            leaf.className = 'lni lni-leaf particle leaf-particle';
             leaf.style.left = `${Math.random() * 100}vw`;
             leaf.style.fontSize = `${Math.random() * 20 + 20}px`;
             leaf.style.animationDuration = `${Math.random() * 4 + 6}s`;
             document.body.appendChild(leaf);
-            
             setTimeout(() => leaf.remove(), 8000);
         }
 
-        // Create leaves periodically
-        setInterval(createLeaf, 800);
+        function createRain() {
+            const rain = document.createElement('div');
+            rain.className = 'particle rain-particle';
+            rain.style.left = `${Math.random() * 100}vw`;
+            rain.style.animationDuration = `${Math.random() * 0.5 + 0.5}s`;
+            document.body.appendChild(rain);
+            setTimeout(() => rain.remove(), 1000);
+        }
+
+        function createSnow() {
+            const snow = document.createElement('div');
+            snow.className = 'particle snow-particle';
+            snow.style.left = `${Math.random() * 100}vw`;
+            snow.style.animationDuration = `${Math.random() * 5 + 5}s`;
+            document.body.appendChild(snow);
+            setTimeout(() => snow.remove(), 10000);
+        }
+
+        // Particle effect switcher
+        function createParticle() {
+            switch (effects[currentEffectIndex]) {
+                case 'leaf':
+                    createLeaf();
+                    break;
+                case 'rain':
+                    createRain();
+                    break;
+                case 'snow':
+                    createSnow();
+                    break;
+            }
+        }
+
+        // Create particles periodically
+        setInterval(createParticle, 200); // Adjusted for varying effect densities
 
         // Initial timer display
         updateTimer();
