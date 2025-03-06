@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forest Lo-Fi Study</title>
-    <!-- LineIcons CDN (Free Tier) -->
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <style>
         body {
@@ -195,6 +194,57 @@
             border-radius: 25px;
             font-size: 1rem;
         }
+
+        .time-inputs {
+            margin: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .time-inputs input {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            width: 80px;
+            text-align: center;
+        }
+
+        .time-inputs input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .victory-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .victory-message.active {
+            opacity: 1;
+        }
+
+        .victory-text {
+            font-size: 8rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ffaa00;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -207,6 +257,10 @@
         <div class="mode-label">Pomodoro Mode</div>
         <div class="effect-label" id="effectLabel">Leaf Effect</div>
         <div class="timer-display" id="timer">25:00</div>
+        <div class="time-inputs">
+            <input type="number" id="pomodoroTime" value="25" min="1" max="120" placeholder="Pomodoro (min)">
+            <input type="number" id="breakTime" value="5" min="1" max="60" placeholder="Break (min)">
+        </div>
         <div class="controls">
             <button onclick="startTimer()">Start</button>
             <button onclick="pauseTimer()">Pause</button>
@@ -214,27 +268,44 @@
             <button onclick="toggleMode()">Toggle Mode</button>
         </div>
     </div>
+    <div class="victory-message" id="victoryMessage">
+        <div class="victory-text">YOU DID IT YOU WON!!!</div>
+    </div>
 
     <script>
         const backgrounds = [
-            "https://i.ytimg.com/vi/8vSGD6y-piQ/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLDW4Csgy4TzNC3BjZCvmy3dcEyRXA",
-            "https://i.ytimg.com/vi/U5ABJiiLQeY/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA1Rgs4FjyNLEEx_LUtOpntxp9H8Q",
+            "https://i.ytimg.com/vi/8vSGD6y-piQ/hq720.jpg",
+            "https://i.ytimg.com/vi/U5ABJiiLQeY/hq720.jpg",
             "https://wallpapercave.com/wp/wp11859425.jpg"
         ];
         let currentBgIndex = 0;
         const background = document.getElementById('background');
-        let time = 25 * 60; // 25 minutes default (Pomodoro)
+        let pomodoroTime = 25 * 60; // Default Pomodoro
+        let breakTime = 5 * 60;    // Default Break
+        let time = pomodoroTime;
         let interval = null;
         let isPomodoro = true;
         const timerDisplay = document.getElementById('timer');
         const modeLabel = document.querySelector('.mode-label');
         const effectLabel = document.getElementById('effectLabel');
+        const pomodoroInput = document.getElementById('pomodoroTime');
+        const breakInput = document.getElementById('breakTime');
+        const victoryMessage = document.getElementById('victoryMessage');
         
-        // Particle effect states
         const effects = ['leaf', 'rain', 'snow'];
         let currentEffectIndex = 0;
 
-        // Timer functions
+        // Sound effects
+        const sounds = {
+            forest: new Audio('https://cdn.pixabay.com/audio/2024/03/01/audio_3e97b9a8-2a5e-4f8e-86e8-5fddbcb395e8.mp3'), // Enchanted Forest from Pixabay
+            rain: new Audio('https://www.chosic.com/wp-content/uploads/2023/10/rain-01.mp3'), // Rain from Chosic
+            snow: new Audio('https://freesound.org/data/previews/349/349041_5867002-lq.mp3') // Snow from Freesound
+        };
+        for (let sound in sounds) {
+            sounds[sound].loop = true;
+            sounds[sound].volume = 0.3;
+        }
+
         function updateTimer() {
             const minutes = Math.floor(time / 60);
             const seconds = time % 60;
@@ -242,33 +313,65 @@
             if (time > 0) time--;
             else {
                 clearInterval(interval);
-                alert(isPomodoro ? "Pomodoro complete! Take a break!" : "Break complete! Back to work!");
-                toggleMode();
+                if (isPomodoro) {
+                    showVictoryMessage();
+                    setTimeout(() => {
+                        toggleMode();
+                    }, 3000);
+                } else {
+                    alert("Break complete! Back to work!");
+                    toggleMode();
+                }
             }
         }
 
         function startTimer() {
             if (!interval) {
                 interval = setInterval(updateTimer, 1000);
+                playSound();
             }
         }
 
         function pauseTimer() {
             clearInterval(interval);
             interval = null;
+            pauseSound();
         }
 
         function resetTimer() {
             pauseTimer();
-            time = isPomodoro ? 25 * 60 : 5 * 60;
+            time = isPomodoro ? pomodoroTime : breakTime;
             updateTimer();
         }
 
         function toggleMode() {
             isPomodoro = !isPomodoro;
-            time = isPomodoro ? 25 * 60 : 5 * 60;
+            pomodoroTime = parseInt(pomodoroInput.value) * 60 || 25 * 60;
+            breakTime = parseInt(breakInput.value) * 60 || 5 * 60;
+            time = isPomodoro ? pomodoroTime : breakTime;
             modeLabel.textContent = isPomodoro ? "Pomodoro Mode" : "Break Mode";
             updateTimer();
+            playSound();
+        }
+
+        function showVictoryMessage() {
+            victoryMessage.classList.add('active');
+            setTimeout(() => {
+                victoryMessage.classList.remove('active');
+            }, 3000);
+        }
+
+        // Sound control
+        function playSound() {
+            pauseSound();
+            const soundKey = effects[currentEffectIndex] === 'leaf' ? 'forest' : effects[currentEffectIndex];
+            sounds[soundKey].play();
+        }
+
+        function pauseSound() {
+            for (let sound in sounds) {
+                sounds[sound].pause();
+            }
         }
 
         // Background toggle (Q key)
@@ -288,6 +391,7 @@
             if (e.key.toLowerCase() === 't') {
                 currentEffectIndex = (currentEffectIndex + 1) % effects.length;
                 effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
+                playSound();
             }
         });
 
@@ -320,7 +424,6 @@
             setTimeout(() => snow.remove(), 10000);
         }
 
-        // Particle effect switcher
         function createParticle() {
             switch (effects[currentEffectIndex]) {
                 case 'leaf':
@@ -335,10 +438,7 @@
             }
         }
 
-        // Create particles periodically
-        setInterval(createParticle, 200); // Adjusted for varying effect densities
-
-        // Initial timer display
+        setInterval(createParticle, 200);
         updateTimer();
     </script>
 </body>
