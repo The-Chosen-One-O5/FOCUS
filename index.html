@@ -199,6 +199,12 @@
             margin: 20px;
             display: flex;
             gap: 15px;
+            transition: opacity 0.3s ease;
+        }
+
+        .time-inputs.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .time-inputs input {
@@ -257,7 +263,7 @@
         <div class="mode-label">Pomodoro Mode</div>
         <div class="effect-label" id="effectLabel">Leaf Effect</div>
         <div class="timer-display" id="timer">25:00</div>
-        <div class="time-inputs">
+        <div class="time-inputs" id="timeInputs">
             <input type="number" id="pomodoroTime" value="25" min="1" max="120" placeholder="Pomodoro (min)">
             <input type="number" id="breakTime" value="5" min="1" max="60" placeholder="Break (min)">
         </div>
@@ -291,6 +297,7 @@
         const pomodoroInput = document.getElementById('pomodoroTime');
         const breakInput = document.getElementById('breakTime');
         const victoryMessage = document.getElementById('victoryMessage');
+        const timeInputs = document.getElementById('timeInputs');
         
         const effects = ['leaf', 'rain', 'snow'];
         let currentEffectIndex = 0;
@@ -304,6 +311,7 @@
         for (let sound in sounds) {
             sounds[sound].loop = true;
             sounds[sound].volume = 0.3;
+            sounds[sound].preload = 'auto'; // Preload audio to reduce delay
         }
 
         function updateTimer() {
@@ -327,6 +335,15 @@
 
         function startTimer() {
             if (!interval) {
+                // Set times from inputs before starting
+                pomodoroTime = parseInt(pomodoroInput.value) * 60 || 25 * 60;
+                breakTime = parseInt(breakInput.value) * 60 || 5 * 60;
+                time = isPomodoro ? pomodoroTime : breakTime;
+                updateTimer();
+                
+                // Hide inputs
+                timeInputs.classList.add('hidden');
+                
                 interval = setInterval(updateTimer, 1000);
                 playSound();
             }
@@ -336,12 +353,14 @@
             clearInterval(interval);
             interval = null;
             pauseSound();
+            timeInputs.classList.remove('hidden'); // Show inputs when paused
         }
 
         function resetTimer() {
             pauseTimer();
             time = isPomodoro ? pomodoroTime : breakTime;
             updateTimer();
+            timeInputs.classList.remove('hidden'); // Show inputs when reset
         }
 
         function toggleMode() {
@@ -351,6 +370,7 @@
             time = isPomodoro ? pomodoroTime : breakTime;
             modeLabel.textContent = isPomodoro ? "Pomodoro Mode" : "Break Mode";
             updateTimer();
+            timeInputs.classList.remove('hidden'); // Show inputs when mode toggled
             playSound();
         }
 
@@ -365,7 +385,9 @@
         function playSound() {
             pauseSound();
             const soundKey = effects[currentEffectIndex] === 'leaf' ? 'forest' : effects[currentEffectIndex];
-            sounds[soundKey].play();
+            sounds[soundKey].play().catch(error => {
+                console.log("Audio playback failed:", error);
+            });
         }
 
         function pauseSound() {
@@ -391,7 +413,7 @@
             if (e.key.toLowerCase() === 't') {
                 currentEffectIndex = (currentEffectIndex + 1) % effects.length;
                 effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
-                playSound();
+                if (interval) playSound(); // Only play if timer is running
             }
         });
 
