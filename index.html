@@ -286,8 +286,8 @@
         ];
         let currentBgIndex = 0;
         const background = document.getElementById('background');
-        let pomodoroTime = 25 * 60; // Default Pomodoro
-        let breakTime = 5 * 60;    // Default Break
+        let pomodoroTime = 25 * 60;
+        let breakTime = 5 * 60;
         let time = pomodoroTime;
         let interval = null;
         let isPomodoro = true;
@@ -304,15 +304,21 @@
 
         // Sound effects
         const sounds = {
-            forest: new Audio('https://cdn.pixabay.com/audio/2024/03/01/audio_3e97b9a8-2a5e-4f8e-86e8-5fddbcb395e8.mp3'), // Enchanted Forest from Pixabay
-            rain: new Audio('https://www.chosic.com/wp-content/uploads/2023/10/rain-01.mp3'), // Rain from Chosic
-            snow: new Audio('https://freesound.org/data/previews/349/349041_5867002-lq.mp3') // Snow from Freesound
+            leaf1: new Audio('https://www.dropbox.com/scl/fi/bbesonytyynk5hs7seuiy/midnight-forest-184304.mp3?rlkey=g9sqlja4rphmkzuiihonheer2&st=cqvnt7ev&dl=1'),
+            leaf2: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=ui3kdsq5&dl=1'),
+            rain: new Audio('https://www.dropbox.com/scl/fi/iaouozc1osse7h5ea9lon/thunder-chosic.com.mp3?rlkey=o7u0rarnh4kk657qhmcgyiolz&st=2r9f625j&dl=1'),
+            snow: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=cq8j3dij&dl=1'),
+            pomodoroComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=0'),
+            breakComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=0')
         };
+
         for (let sound in sounds) {
-            sounds[sound].loop = true;
+            sounds[sound].loop = sound === 'pomodoroComplete' || sound === 'breakComplete' ? false : true;
             sounds[sound].volume = 0.3;
-            sounds[sound].preload = 'auto'; // Preload audio to reduce delay
+            sounds[sound].preload = 'auto';
         }
+        // Set start time for breakComplete to skip first 3 seconds
+        sounds.breakComplete.currentTime = 3;
 
         function updateTimer() {
             const minutes = Math.floor(time / 60);
@@ -322,11 +328,13 @@
             else {
                 clearInterval(interval);
                 if (isPomodoro) {
+                    sounds.pomodoroComplete.play();
                     showVictoryMessage();
                     setTimeout(() => {
                         toggleMode();
                     }, 3000);
                 } else {
+                    sounds.breakComplete.play();
                     alert("Break complete! Back to work!");
                     toggleMode();
                 }
@@ -335,13 +343,11 @@
 
         function startTimer() {
             if (!interval) {
-                // Set times from inputs before starting
                 pomodoroTime = parseInt(pomodoroInput.value) * 60 || 25 * 60;
                 breakTime = parseInt(breakInput.value) * 60 || 5 * 60;
                 time = isPomodoro ? pomodoroTime : breakTime;
                 updateTimer();
                 
-                // Hide inputs
                 timeInputs.classList.add('hidden');
                 
                 interval = setInterval(updateTimer, 1000);
@@ -353,14 +359,14 @@
             clearInterval(interval);
             interval = null;
             pauseSound();
-            timeInputs.classList.remove('hidden'); // Show inputs when paused
+            timeInputs.classList.remove('hidden');
         }
 
         function resetTimer() {
             pauseTimer();
             time = isPomodoro ? pomodoroTime : breakTime;
             updateTimer();
-            timeInputs.classList.remove('hidden'); // Show inputs when reset
+            timeInputs.classList.remove('hidden');
         }
 
         function toggleMode() {
@@ -370,7 +376,7 @@
             time = isPomodoro ? pomodoroTime : breakTime;
             modeLabel.textContent = isPomodoro ? "Pomodoro Mode" : "Break Mode";
             updateTimer();
-            timeInputs.classList.remove('hidden'); // Show inputs when mode toggled
+            timeInputs.classList.remove('hidden');
             playSound();
         }
 
@@ -384,7 +390,18 @@
         // Sound control
         function playSound() {
             pauseSound();
-            const soundKey = effects[currentEffectIndex] === 'leaf' ? 'forest' : effects[currentEffectIndex];
+            let soundKey;
+            switch(effects[currentEffectIndex]) {
+                case 'leaf':
+                    soundKey = Math.random() < 0.5 ? 'leaf1' : 'leaf2';
+                    break;
+                case 'rain':
+                    soundKey = 'rain';
+                    break;
+                case 'snow':
+                    soundKey = 'snow';
+                    break;
+            }
             sounds[soundKey].play().catch(error => {
                 console.log("Audio playback failed:", error);
             });
@@ -392,7 +409,10 @@
 
         function pauseSound() {
             for (let sound in sounds) {
-                sounds[sound].pause();
+                if (sound !== 'pomodoroComplete' && sound !== 'breakComplete') {
+                    sounds[sound].pause();
+                    sounds[sound].currentTime = 0;
+                }
             }
         }
 
@@ -413,7 +433,7 @@
             if (e.key.toLowerCase() === 't') {
                 currentEffectIndex = (currentEffectIndex + 1) % effects.length;
                 effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
-                if (interval) playSound(); // Only play if timer is running
+                if (interval) playSound();
             }
         });
 
