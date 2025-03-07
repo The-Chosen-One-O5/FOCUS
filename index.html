@@ -6,7 +6,7 @@
     <title>Forest Lo-Fi Study</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <style>
-        /* [Previous CSS remains unchanged] */
+        /* Previous CSS remains unchanged */
         body {
             margin: 0;
             padding: 0;
@@ -273,6 +273,7 @@
             <button onclick="pauseTimer()">Pause</button>
             <button onclick="resetTimer()">Reset</button>
             <button onclick="toggleMode()">Toggle Mode</button>
+            <button onclick="testSound()">Test Sound</button>
         </div>
     </div>
     <div class="victory-message" id="victoryMessage">
@@ -302,8 +303,9 @@
         
         const effects = ['leaf', 'rain', 'snow'];
         let currentEffectIndex = 0;
+        let audioContextUnlocked = false;
 
-        // Sound effects with modified Dropbox links for direct access
+        // Sound effects
         const sounds = {
             leaf1: new Audio('https://dl.dropbox.com/scl/fi/bbesonytyynk5hs7seuiy/midnight-forest-184304.mp3?rlkey=g9sqlja4rphmkzuiihonheer2&dl=1'),
             leaf2: new Audio('https://dl.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&dl=1'),
@@ -315,12 +317,12 @@
 
         let currentLeafTrack = 'leaf1';
         
-        // Audio setup and error handling
+        // Audio setup
         for (let sound in sounds) {
             if (sound !== 'pomodoroComplete' && sound !== 'breakComplete') {
                 sounds[sound].loop = true;
             }
-            sounds[sound].volume = 0.3;
+            sounds[sound].volume = 0.7; // Increased from 0.3 to 0.7
             sounds[sound].preload = 'auto';
             sounds[sound].onerror = () => console.error(`Failed to load audio: ${sound}`);
             sounds[sound].oncanplay = () => console.log(`Audio loaded successfully: ${sound}`);
@@ -329,17 +331,30 @@
         sounds.breakComplete.currentTime = 3;
 
         sounds.leaf1.addEventListener('ended', () => {
-            if (currentEffectIndex === 0) {
+            if (currentEffectIndex === 0 && audioContextUnlocked) {
                 currentLeafTrack = 'leaf2';
                 sounds.leaf2.play().catch(e => console.error('Leaf2 play error:', e));
             }
         });
         sounds.leaf2.addEventListener('ended', () => {
-            if (currentEffectIndex === 0) {
+            if (currentEffectIndex === 0 && audioContextUnlocked) {
                 currentLeafTrack = 'leaf1';
                 sounds.leaf1.play().catch(e => console.error('Leaf1 play error:', e));
             }
         });
+
+        // Unlock audio context on first user interaction
+        function unlockAudioContext() {
+            if (!audioContextUnlocked) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioContext = new AudioContext();
+                audioContext.resume().then(() => {
+                    audioContextUnlocked = true;
+                    console.log('Audio context unlocked');
+                    playSound(); // Try playing sound after unlock
+                });
+            }
+        }
 
         function updateTimer() {
             const minutes = Math.floor(time / 60);
@@ -349,13 +364,17 @@
             else {
                 clearInterval(interval);
                 if (isPomodoro) {
-                    sounds.pomodoroComplete.play().catch(e => console.error('Pomodoro complete play error:', e));
+                    if (audioContextUnlocked) {
+                        sounds.pomodoroComplete.play().catch(e => console.error('Pomodoro complete play error:', e));
+                    }
                     showVictoryMessage();
                     setTimeout(() => {
                         toggleMode();
                     }, 3000);
                 } else {
-                    sounds.breakComplete.play().catch(e => console.error('Break complete play error:', e));
+                    if (audioContextUnlocked) {
+                        sounds.breakComplete.play().catch(e => console.error('Break complete play error:', e));
+                    }
                     alert("Break complete! Back to work!");
                     toggleMode();
                 }
@@ -364,6 +383,7 @@
 
         function startTimer() {
             if (!interval) {
+                unlockAudioContext(); // Unlock audio on first interaction
                 pomodoroTime = parseInt(pomodoroInput.value) * 60 || 25 * 60;
                 breakTime = parseInt(breakInput.value) * 60 || 5 * 60;
                 time = isPomodoro ? pomodoroTime : breakTime;
@@ -372,7 +392,7 @@
                 timeInputs.classList.add('hidden');
                 
                 interval = setInterval(updateTimer, 1000);
-                playSound();
+                if (audioContextUnlocked) playSound();
             }
         }
 
@@ -398,7 +418,7 @@
             modeLabel.textContent = isPomodoro ? "Pomodoro Mode" : "Break Mode";
             updateTimer();
             timeInputs.classList.remove('hidden');
-            playSound();
+            if (audioContextUnlocked) playSound();
         }
 
         function showVictoryMessage() {
@@ -409,6 +429,7 @@
         }
 
         function playSound() {
+            if (!audioContextUnlocked) return;
             pauseSound();
             let soundKey;
             switch (effects[currentEffectIndex]) {
@@ -436,6 +457,16 @@
             }
         }
 
+        // Test sound function
+        function testSound() {
+            unlockAudioContext();
+            if (audioContextUnlocked) {
+                sounds.leaf1.play()
+                    .then(() => console.log('Test sound playing'))
+                    .catch(e => console.error('Test sound error:', e));
+            }
+        }
+
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'q') {
                 currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
@@ -451,7 +482,7 @@
             if (e.key.toLowerCase() === 't') {
                 currentEffectIndex = (currentEffectIndex + 1) % effects.length;
                 effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
-                if (interval) {
+                if (interval && audioContextUnlocked) {
                     playSound();
                 }
             }
@@ -502,7 +533,6 @@
         setInterval(createParticle, 200);
         updateTimer();
 
-        // Test audio on load
         window.addEventListener('load', () => {
             console.log('Testing audio availability...');
             Object.keys(sounds).forEach(key => {
