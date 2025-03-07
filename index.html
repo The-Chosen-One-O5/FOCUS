@@ -6,6 +6,7 @@
     <title>Forest Lo-Fi Study</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <style>
+        /* [Previous CSS remains unchanged] */
         body {
             margin: 0;
             padding: 0;
@@ -302,39 +303,41 @@
         const effects = ['leaf', 'rain', 'snow'];
         let currentEffectIndex = 0;
 
-        // Sound effects
+        // Sound effects with modified Dropbox links for direct access
         const sounds = {
-            leaf1: new Audio('https://www.dropbox.com/scl/fi/bbesonytyynk5hs7seuiy/midnight-forest-184304.mp3?rlkey=g9sqlja4rphmkzuiihonheer2&st=cqvnt7ev&dl=1'),
-            leaf2: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=ui3kdsq5&dl=1'),
-            rain: new Audio('https://www.dropbox.com/scl/fi/iaouozc1osse7h5ea9lon/thunder-chosic.com.mp3?rlkey=o7u0rarnh4kk657qhmcgyiolz&st=2r9f625j&dl=1'),
-            snow: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=cq8j3dij&dl=1'),
-            pomodoroComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=1'),
-            breakComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=1')
+            leaf1: new Audio('https://dl.dropbox.com/scl/fi/bbesonytyynk5hs7seuiy/midnight-forest-184304.mp3?rlkey=g9sqlja4rphmkzuiihonheer2&dl=1'),
+            leaf2: new Audio('https://dl.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&dl=1'),
+            rain: new Audio('https://dl.dropbox.com/scl/fi/iaouozc1osse7h5ea9lon/thunder-chosic.com.mp3?rlkey=o7u0rarnh4kk657qhmcgyiolz&dl=1'),
+            snow: new Audio('https://dl.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&dl=1'),
+            pomodoroComplete: new Audio('https://dl.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&dl=1'),
+            breakComplete: new Audio('https://dl.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&dl=1')
         };
 
         let currentLeafTrack = 'leaf1';
+        
+        // Audio setup and error handling
         for (let sound in sounds) {
             if (sound !== 'pomodoroComplete' && sound !== 'breakComplete') {
                 sounds[sound].loop = true;
             }
             sounds[sound].volume = 0.3;
             sounds[sound].preload = 'auto';
+            sounds[sound].onerror = () => console.error(`Failed to load audio: ${sound}`);
+            sounds[sound].oncanplay = () => console.log(`Audio loaded successfully: ${sound}`);
         }
 
-        // Set start time for breakComplete to skip first 3 seconds
         sounds.breakComplete.currentTime = 3;
 
-        // Leaf track switching
         sounds.leaf1.addEventListener('ended', () => {
             if (currentEffectIndex === 0) {
                 currentLeafTrack = 'leaf2';
-                sounds.leaf2.play();
+                sounds.leaf2.play().catch(e => console.error('Leaf2 play error:', e));
             }
         });
         sounds.leaf2.addEventListener('ended', () => {
             if (currentEffectIndex === 0) {
                 currentLeafTrack = 'leaf1';
-                sounds.leaf1.play();
+                sounds.leaf1.play().catch(e => console.error('Leaf1 play error:', e));
             }
         });
 
@@ -346,13 +349,13 @@
             else {
                 clearInterval(interval);
                 if (isPomodoro) {
-                    sounds.pomodoroComplete.play();
+                    sounds.pomodoroComplete.play().catch(e => console.error('Pomodoro complete play error:', e));
                     showVictoryMessage();
                     setTimeout(() => {
                         toggleMode();
                     }, 3000);
                 } else {
-                    sounds.breakComplete.play();
+                    sounds.breakComplete.play().catch(e => console.error('Break complete play error:', e));
                     alert("Break complete! Back to work!");
                     toggleMode();
                 }
@@ -419,9 +422,9 @@
                     soundKey = 'snow';
                     break;
             }
-            sounds[soundKey].play().catch(error => {
-                console.log("Audio playback failed:", error);
-            });
+            sounds[soundKey].play()
+                .then(() => console.log(`Playing: ${soundKey}`))
+                .catch(error => console.error(`Error playing ${soundKey}:`, error));
         }
 
         function pauseSound() {
@@ -498,6 +501,14 @@
 
         setInterval(createParticle, 200);
         updateTimer();
+
+        // Test audio on load
+        window.addEventListener('load', () => {
+            console.log('Testing audio availability...');
+            Object.keys(sounds).forEach(key => {
+                sounds[key].load();
+            });
+        });
     </script>
 </body>
 </html>
