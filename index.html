@@ -308,17 +308,35 @@
             leaf2: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=ui3kdsq5&dl=1'),
             rain: new Audio('https://www.dropbox.com/scl/fi/iaouozc1osse7h5ea9lon/thunder-chosic.com.mp3?rlkey=o7u0rarnh4kk657qhmcgyiolz&st=2r9f625j&dl=1'),
             snow: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=cq8j3dij&dl=1'),
-            pomodoroComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=0'),
-            breakComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=0')
+            pomodoroComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=1'),
+            breakComplete: new Audio('https://www.dropbox.com/scl/fi/ihrcv1s3o4m4abhn6oa5z/level-up-4-243762.mp3?rlkey=qkaf4zrhipxtxpu51an0do45r&st=boipxpb5&dl=1')
         };
 
+        let currentLeafTrack = 'leaf1';
         for (let sound in sounds) {
-            sounds[sound].loop = sound === 'pomodoroComplete' || sound === 'breakComplete' ? false : true;
+            if (sound !== 'pomodoroComplete' && sound !== 'breakComplete') {
+                sounds[sound].loop = true;
+            }
             sounds[sound].volume = 0.3;
             sounds[sound].preload = 'auto';
         }
+
         // Set start time for breakComplete to skip first 3 seconds
         sounds.breakComplete.currentTime = 3;
+
+        // Leaf track switching
+        sounds.leaf1.addEventListener('ended', () => {
+            if (currentEffectIndex === 0) {
+                currentLeafTrack = 'leaf2';
+                sounds.leaf2.play();
+            }
+        });
+        sounds.leaf2.addEventListener('ended', () => {
+            if (currentEffectIndex === 0) {
+                currentLeafTrack = 'leaf1';
+                sounds.leaf1.play();
+            }
+        });
 
         function updateTimer() {
             const minutes = Math.floor(time / 60);
@@ -387,13 +405,12 @@
             }, 3000);
         }
 
-        // Sound control
         function playSound() {
             pauseSound();
             let soundKey;
-            switch(effects[currentEffectIndex]) {
+            switch (effects[currentEffectIndex]) {
                 case 'leaf':
-                    soundKey = Math.random() < 0.5 ? 'leaf1' : 'leaf2';
+                    soundKey = currentLeafTrack;
                     break;
                 case 'rain':
                     soundKey = 'rain';
@@ -416,7 +433,6 @@
             }
         }
 
-        // Background toggle (Q key)
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'q') {
                 currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
@@ -428,16 +444,16 @@
             }
         });
 
-        // Effect toggle (T key)
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 't') {
                 currentEffectIndex = (currentEffectIndex + 1) % effects.length;
                 effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
-                if (interval) playSound();
+                if (interval) {
+                    playSound();
+                }
             }
         });
 
-        // Particle creation functions
         function createLeaf() {
             const leaf = document.createElement('i');
             leaf.className = 'lni lni-leaf particle leaf-particle';
