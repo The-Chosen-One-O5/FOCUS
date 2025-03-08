@@ -251,6 +251,66 @@
             font-weight: bold;
             text-align: center;
         }
+
+        .quote-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.2);
+            padding: 20px 40px;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.5rem;
+            text-align: center;
+            z-index: 50;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+
+        .quote-container.hidden {
+            opacity: 0;
+        }
+
+        .session-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.25);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            color: #fff;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .session-counter.visible {
+            opacity: 1;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(129, 199, 132, 0.9);
+            padding: 20px 40px;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.5rem;
+            text-align: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .achievement-popup.active {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -278,6 +338,9 @@
     <div class="victory-message" id="victoryMessage">
         <div class="victory-text">YOU DID IT YOU WON!!!</div>
     </div>
+    <div class="quote-container" id="quoteContainer"></div>
+    <div class="session-counter" id="sessionCounter">Sessions Completed: 0</div>
+    <div class="achievement-popup" id="achievementPopup"></div>
 
     <script>
         const backgrounds = [
@@ -325,7 +388,7 @@
             }
             sounds[sound].volume = 0.3;
             sounds[sound].preload = 'auto';
-            sounds[sound].load(); // Ensure audio is loaded
+            sounds[sound].load();
         }
 
         // Handle leaf music sequence
@@ -342,6 +405,57 @@
             }
         });
 
+        // Inspirational Quotes
+        const quotes = [
+            "The best way to get started is to quit talking and begin doing. – Walt Disney",
+            "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
+            "The secret of getting ahead is getting started. – Mark Twain",
+            "Focus on the step in front of you, not the whole staircase. – Unknown",
+            "Small progress is still progress. – Unknown",
+            "The future depends on what you do today. – Mahatma Gandhi",
+            "You are stronger than you think. – Unknown",
+            "Every moment is a fresh beginning. – T.S. Eliot",
+            "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
+            "Believe you can and you’re halfway there. – Theodore Roosevelt"
+        ];
+
+        const quoteContainer = document.getElementById('quoteContainer');
+        function displayRandomQuote() {
+            const shuffledQuotes = quotes.sort(() => 0.5 - Math.random());
+            quoteContainer.textContent = shuffledQuotes[0];
+            setTimeout(() => {
+                quoteContainer.classList.add('hidden');
+            }, 5000);
+        }
+        window.onload = displayRandomQuote;
+
+        // Session Counter
+        let sessionCount = 0;
+        const sessionCounter = document.getElementById('sessionCounter');
+        let isCounterVisible = false;
+        function updateSessionCounter() {
+            sessionCounter.textContent = `Sessions Completed: ${sessionCount}`;
+        }
+
+        // Achievements
+        const achievementPopup = document.getElementById('achievementPopup');
+        const achievements = [
+            { count: 5, message: "5 Sessions Complete! Keep it up!" },
+            { count: 10, message: "10 Sessions Done! You're on fire!" },
+            { count: 15, message: "15 Sessions Mastered! Focus Legend!" }
+        ];
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (sessionCount === achievement.count) {
+                    achievementPopup.textContent = achievement.message;
+                    achievementPopup.classList.add('active');
+                    setTimeout(() => {
+                        achievementPopup.classList.remove('active');
+                    }, 3000);
+                }
+            });
+        }
+
         function updateTimer() {
             const minutes = Math.floor(time / 60);
             const seconds = time % 60;
@@ -355,6 +469,9 @@
                         console.error("Error playing pomodoro complete sound:", error);
                     });
                     showVictoryMessage();
+                    sessionCount++;
+                    updateSessionCounter();
+                    checkAchievements();
                     setTimeout(() => {
                         toggleMode();
                     }, 3000);
@@ -380,7 +497,6 @@
                 interval = setInterval(updateTimer, 1000);
                 playBackgroundMusic();
 
-                // Unlock audio context on first interaction
                 if (!window.audioUnlocked) {
                     const silentSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
                     silentSound.play().then(() => {
@@ -423,7 +539,6 @@
             }, 3000);
         }
 
-        // Sound control
         function playBackgroundMusic() {
             pauseBackgroundMusic();
             switch(effects[currentEffectIndex]) {
@@ -476,6 +591,14 @@
                 effectLabel.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Effect`;
                 musicButton.textContent = `${effects[currentEffectIndex].charAt(0).toUpperCase() + effects[currentEffectIndex].slice(1)} Music`;
                 playBackgroundMusic();
+            }
+        });
+
+        // Session counter toggle (D key)
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'd') {
+                isCounterVisible = !isCounterVisible;
+                sessionCounter.classList.toggle('visible', isCounterVisible);
             }
         });
 
