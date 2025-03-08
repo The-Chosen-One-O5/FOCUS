@@ -497,6 +497,13 @@
                 interval = setInterval(updateTimer, 1000);
                 playBackgroundMusic();
 
+                // Enter fullscreen mode
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error("Error entering fullscreen:", err);
+                    });
+                }
+
                 if (!window.audioUnlocked) {
                     const silentSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
                     silentSound.play().then(() => {
@@ -512,6 +519,12 @@
             interval = null;
             pauseBackgroundMusic();
             timeInputs.classList.remove('hidden');
+            // Exit fullscreen mode
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(err => {
+                    console.error("Error exiting fullscreen:", err);
+                });
+            }
         }
 
         function resetTimer() {
@@ -519,6 +532,12 @@
             time = isPomodoro ? pomodoroTime : breakTime;
             updateTimer();
             timeInputs.classList.remove('hidden');
+            // Exit fullscreen mode
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(err => {
+                    console.error("Error exiting fullscreen:", err);
+                });
+            }
         }
 
         function toggleMode() {
