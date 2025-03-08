@@ -322,6 +322,7 @@
             }
             sounds[sound].volume = 0.3;
             sounds[sound].preload = 'auto';
+            sounds[sound].load(); // Ensure audio is loaded
         }
 
         // Handle leaf music sequence
@@ -347,13 +348,17 @@
                 clearInterval(interval);
                 pauseBackgroundMusic();
                 if (isPomodoro) {
-                    sounds.pomodoroComplete.play();
+                    sounds.pomodoroComplete.play().catch(error => {
+                        console.error("Error playing pomodoro complete sound:", error);
+                    });
                     showVictoryMessage();
                     setTimeout(() => {
                         toggleMode();
                     }, 3000);
                 } else {
-                    sounds.breakComplete.play();
+                    sounds.breakComplete.play().catch(error => {
+                        console.error("Error playing break complete sound:", error);
+                    });
                     alert("Break complete! Back to work!");
                     toggleMode();
                 }
@@ -371,6 +376,15 @@
                 
                 interval = setInterval(updateTimer, 1000);
                 playBackgroundMusic();
+
+                // Unlock audio context on first interaction
+                if (!window.audioUnlocked) {
+                    const silentSound = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+                    silentSound.play().then(() => {
+                        window.audioUnlocked = true;
+                        console.log("Audio context unlocked");
+                    }).catch(error => console.error("Error unlocking audio:", error));
+                }
             }
         }
 
