@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Forest Lo-Fi Study</title>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <style>
@@ -91,6 +91,8 @@
             display: flex;
             gap: 25px;
             margin: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         button {
@@ -310,6 +312,105 @@
 
         .achievement-popup.active {
             opacity: 1;
+        }
+
+        /* Mobile-specific adjustments */
+        @media only screen and (max-width: 768px) {
+            .timer-display {
+                font-size: 2.5rem; /* Smaller timer for mobile */
+                padding: 15px 30px;
+                margin: 10px;
+            }
+
+            .controls {
+                gap: 10px; /* Reduce gap between buttons */
+                margin: 10px;
+            }
+
+            button {
+                padding: 8px 15px; /* Smaller buttons */
+                font-size: 0.9rem;
+            }
+
+            .time-inputs {
+                margin: 10px;
+                gap: 10px;
+            }
+
+            .time-inputs input {
+                width: 60px; /* Smaller inputs */
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+            .mode-label, .effect-label {
+                font-size: 0.8rem; /* Smaller labels */
+                padding: 6px 15px;
+                top: 10px;
+            }
+
+            .effect-label {
+                right: 10px;
+            }
+
+            .victory-text {
+                font-size: 3rem; /* Smaller victory text */
+                padding: 0 10px;
+            }
+
+            .quote-container {
+                font-size: 1rem; /* Smaller quote */
+                padding: 15px 20px;
+                width: 80%; /* Prevent overflow */
+            }
+
+            .session-counter {
+                font-size: 0.8rem;
+                padding: 8px 15px;
+                bottom: 10px;
+                left: 10px;
+            }
+
+            .achievement-popup {
+                font-size: 1rem;
+                padding: 15px 20px;
+                width: 80%; /* Prevent overflow */
+            }
+
+            .leaf-particle {
+                font-size: 16px; /* Smaller particles */
+            }
+
+            .rain-particle {
+                height: 15px;
+            }
+
+            .snow-particle {
+                width: 4px;
+                height: 4px;
+            }
+        }
+
+        /* Ensure particles don't overflow on very small screens */
+        @media only screen and (max-width: 480px) {
+            .timer-display {
+                font-size: 2rem;
+                padding: 10px 20px;
+            }
+
+            button {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .time-inputs input {
+                width: 50px;
+                font-size: 0.8rem;
+            }
+
+            .victory-text {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -671,7 +772,7 @@
             }
         }
 
-        setInterval(createParticle, 200);
+        setInterval(createParticle, window.innerWidth <= 768 ? 300 : 200); // Slower particle spawn on mobile
         updateTimer();
     </script>
 </body>
