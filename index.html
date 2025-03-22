@@ -254,6 +254,38 @@
             text-align: center;
         }
 
+        .notification-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(129, 199, 132, 0.9);
+            padding: 20px 40px;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.5rem;
+            text-align: center;
+            z-index: 101;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification-popup.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .notification-popup button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .notification-popup button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .quote-container {
             position: fixed;
             top: 50%;
@@ -293,6 +325,26 @@
             opacity: 1;
         }
 
+        .session-circles {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .circle {
+            width: 15px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .circle.active {
+            background: rgba(129, 199, 132, 0.9);
+            box-shadow: 0 0 15px rgba(129, 199, 132, 1);
+        }
+
         .achievement-popup {
             position: fixed;
             top: 20%;
@@ -317,18 +369,18 @@
         /* Mobile-specific adjustments */
         @media only screen and (max-width: 768px) {
             .timer-display {
-                font-size: 2.5rem; /* Smaller timer for mobile */
+                font-size: 2.5rem;
                 padding: 15px 30px;
                 margin: 10px;
             }
 
             .controls {
-                gap: 10px; /* Reduce gap between buttons */
+                gap: 10px;
                 margin: 10px;
             }
 
             button {
-                padding: 8px 15px; /* Smaller buttons */
+                padding: 8px 15px;
                 font-size: 0.9rem;
             }
 
@@ -338,13 +390,13 @@
             }
 
             .time-inputs input {
-                width: 60px; /* Smaller inputs */
+                width: 60px;
                 padding: 8px;
                 font-size: 0.9rem;
             }
 
             .mode-label, .effect-label {
-                font-size: 0.8rem; /* Smaller labels */
+                font-size: 0.8rem;
                 padding: 6px 15px;
                 top: 10px;
             }
@@ -354,14 +406,20 @@
             }
 
             .victory-text {
-                font-size: 3rem; /* Smaller victory text */
+                font-size: 3rem;
                 padding: 0 10px;
             }
 
+            .notification-popup {
+                font-size: 1rem;
+                padding: 15px 30px;
+                width: 80%;
+            }
+
             .quote-container {
-                font-size: 1rem; /* Smaller quote */
+                font-size: 1rem;
                 padding: 15px 20px;
-                width: 80%; /* Prevent overflow */
+                width: 80%;
             }
 
             .session-counter {
@@ -371,14 +429,24 @@
                 left: 10px;
             }
 
+            .session-circles {
+                margin-top: 10px;
+                gap: 8px;
+            }
+
+            .circle {
+                width: 12px;
+                height: 12px;
+            }
+
             .achievement-popup {
                 font-size: 1rem;
                 padding: 15px 20px;
-                width: 80%; /* Prevent overflow */
+                width: 80%;
             }
 
             .leaf-particle {
-                font-size: 16px; /* Smaller particles */
+                font-size: 16px;
             }
 
             .rain-particle {
@@ -391,7 +459,6 @@
             }
         }
 
-        /* Ensure particles don't overflow on very small screens */
         @media only screen and (max-width: 480px) {
             .timer-display {
                 font-size: 2rem;
@@ -424,6 +491,11 @@
         <div class="mode-label">Pomodoro Mode</div>
         <div class="effect-label" id="effectLabel">Leaf Effect</div>
         <div class="timer-display" id="timer">25:00</div>
+        <div class="session-circles" id="sessionCircles">
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+            <div class="circle active"></div>
+        </div>
         <div class="time-inputs" id="timeInputs">
             <input type="number" id="pomodoroTime" value="25" min="1" max="120" placeholder="Pomodoro (min)">
             <input type="number" id="breakTime" value="5" min="1" max="60" placeholder="Break (min)">
@@ -438,6 +510,10 @@
     </div>
     <div class="victory-message" id="victoryMessage">
         <div class="victory-text">YOU DID IT YOU WON!!!</div>
+    </div>
+    <div class="notification-popup" id="notificationPopup">
+        <div>Pomodoro Complete!</div>
+        <button onclick="proceedToBreak()">Okay</button>
     </div>
     <div class="quote-container" id="quoteContainer"></div>
     <div class="session-counter" id="sessionCounter">Sessions Completed: 0</div>
@@ -466,19 +542,22 @@
         let time = pomodoroTime;
         let interval = null;
         let isPomodoro = true;
+        let currentCycle = 0;
+        const maxCycles = 3;
         const timerDisplay = document.getElementById('timer');
         const modeLabel = document.querySelector('.mode-label');
         const effectLabel = document.getElementById('effectLabel');
         const pomodoroInput = document.getElementById('pomodoroTime');
         const breakInput = document.getElementById('breakTime');
         const victoryMessage = document.getElementById('victoryMessage');
+        const notificationPopup = document.getElementById('notificationPopup');
         const timeInputs = document.getElementById('timeInputs');
         const musicButton = document.getElementById('musicButton');
+        const sessionCircles = document.querySelectorAll('.circle');
         
         const effects = ['leaf', 'rain', 'snow'];
         let currentEffectIndex = 0;
 
-        // Sound effects
         const sounds = {
             leaf1: new Audio('https://www.dropbox.com/scl/fi/3xkks3j4tcmnloz46o03m/Kyle-Dixon-Michael-Stei-Kids.mp3?rlkey=6w97eurecqph68b8f2r7zn5pf&st=epeucz72&dl=1'),
             leaf2: new Audio('https://www.dropbox.com/scl/fi/7vikjhsay7xayyab0tlvt/enchanted-metamorphosis-chronicles-264087.mp3?rlkey=mrdncvjr3g5bo8dksxywh9zxh&st=ui3kdsq5&dl=1'),
@@ -499,7 +578,6 @@
             sounds[sound].load();
         }
 
-        // Handle leaf music sequence
         sounds.leaf1.addEventListener('ended', () => {
             if (currentEffectIndex === 0) {
                 sounds.leaf2.play();
@@ -513,7 +591,6 @@
             }
         });
 
-        // Inspirational Quotes
         const quotes = [
             "The best way to get started is to quit talking and begin doing. – Walt Disney",
             "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
@@ -524,7 +601,7 @@
             "You are stronger than you think. – Unknown",
             "Every moment is a fresh beginning. – T.S. Eliot",
             "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
-            "Steve Jobs:Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. And the only way to do great work is to love what you do. If you haven’t found it yet, keep looking. Don’t settle."
+            "Steve Jobs:Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work."
         ];
 
         const quoteContainer = document.getElementById('quoteContainer');
@@ -537,7 +614,6 @@
         }
         window.onload = displayRandomQuote;
 
-        // Session Counter
         let sessionCount = 0;
         const sessionCounter = document.getElementById('sessionCounter');
         let isCounterVisible = false;
@@ -545,7 +621,6 @@
             sessionCounter.textContent = `Sessions Completed: ${sessionCount}`;
         }
 
-        // Achievements
         const achievementPopup = document.getElementById('achievementPopup');
         const achievements = [
             { count: 5, message: "5 Sessions Complete! Keep it up!" },
@@ -573,22 +648,19 @@
                 clearInterval(interval);
                 pauseBackgroundMusic();
                 if (isPomodoro) {
-                    sounds.pomodoroComplete.play().catch(error => {
-                        console.error("Error playing pomodoro complete sound:", error);
-                    });
-                    showVictoryMessage();
-                    sessionCount++;
-                    updateSessionCounter();
-                    checkAchievements();
-                    setTimeout(() => {
-                        toggleMode();
-                    }, 3000);
+                    showNotificationAndVictory();
                 } else {
                     sounds.breakComplete.play().catch(error => {
                         console.error("Error playing break complete sound:", error);
                     });
-                    alert("Break complete! Back to work!");
-                    toggleMode();
+                    currentCycle++;
+                    updateSessionCircles();
+                    if (currentCycle < maxCycles) {
+                        showNotificationAndVictory();
+                    } else {
+                        alert("All 3 cycles completed! Great work!");
+                        resetAll();
+                    }
                 }
             }
         }
@@ -605,7 +677,10 @@
                 interval = setInterval(updateTimer, 1000);
                 playBackgroundMusic();
 
-                // Enter fullscreen mode
+                if (currentCycle === 0 && isPomodoro) {
+                    updateSessionCircles();
+                }
+
                 if (document.documentElement.requestFullscreen) {
                     document.documentElement.requestFullscreen().catch(err => {
                         console.error("Error entering fullscreen:", err);
@@ -627,7 +702,6 @@
             interval = null;
             pauseBackgroundMusic();
             timeInputs.classList.remove('hidden');
-            // Exit fullscreen mode
             if (document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen().catch(err => {
                     console.error("Error exiting fullscreen:", err);
@@ -640,7 +714,6 @@
             time = isPomodoro ? pomodoroTime : breakTime;
             updateTimer();
             timeInputs.classList.remove('hidden');
-            // Exit fullscreen mode
             if (document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen().catch(err => {
                     console.error("Error exiting fullscreen:", err);
@@ -659,11 +732,48 @@
             playBackgroundMusic();
         }
 
-        function showVictoryMessage() {
+        function showNotificationAndVictory() {
+            pauseBackgroundMusic();
+            sounds.pomodoroComplete.play().catch(error => {
+                console.error("Error playing pomodoro complete sound:", error);
+            });
             victoryMessage.classList.add('active');
+            notificationPopup.classList.add('active');
+            sessionCount++;
+            updateSessionCounter();
+            checkAchievements();
             setTimeout(() => {
                 victoryMessage.classList.remove('active');
             }, 3000);
+        }
+
+        function proceedToBreak() {
+            notificationPopup.classList.remove('active');
+            toggleMode();
+            resetTimer();
+            if (!isPomodoro) {
+                startTimer();
+            }
+        }
+
+        function updateSessionCircles() {
+            sessionCircles.forEach((circle, index) => {
+                if (index < maxCycles - currentCycle) {
+                    circle.classList.add('active');
+                } else {
+                    circle.classList.remove('active');
+                }
+            });
+        }
+
+        function resetAll() {
+            currentCycle = 0;
+            sessionCount = 0;
+            updateSessionCounter();
+            updateSessionCircles();
+            resetTimer();
+            isPomodoro = true;
+            modeLabel.textContent = "Pomodoro Mode";
         }
 
         function playBackgroundMusic() {
@@ -699,7 +809,6 @@
             }
         }
 
-        // Background toggle (Q key)
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'q') {
                 currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
@@ -711,7 +820,6 @@
             }
         });
 
-        // Effect toggle (T key)
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 't') {
                 currentEffectIndex = (currentEffectIndex + 1) % effects.length;
@@ -721,7 +829,6 @@
             }
         });
 
-        // Session counter toggle (D key)
         document.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'd') {
                 isCounterVisible = !isCounterVisible;
@@ -729,7 +836,6 @@
             }
         });
 
-        // Particle creation functions
         function createLeaf() {
             const leaf = document.createElement('i');
             leaf.className = 'lni lni-leaf particle leaf-particle';
@@ -772,7 +878,7 @@
             }
         }
 
-        setInterval(createParticle, window.innerWidth <= 768 ? 300 : 200); // Slower particle spawn on mobile
+        setInterval(createParticle, window.innerWidth <= 768 ? 300 : 200);
         updateTimer();
     </script>
 </body>
