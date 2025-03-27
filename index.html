@@ -643,13 +643,11 @@
             const minutes = Math.floor(time / 60);
             const seconds = time % 60;
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            if (time > 0) {
-                time--;
-            } else {
+            if (time > 0) time--;
+            else {
                 clearInterval(interval);
-
+                pauseBackgroundMusic();
                 if (isPomodoro) {
-                    // Call showNotificationAndVictory here
                     showNotificationAndVictory();
                 } else {
                     sounds.breakComplete.play().catch(error => {
@@ -666,7 +664,6 @@
                 }
             }
         }
-
 
         function startTimer() {
             if (!interval) {
@@ -737,29 +734,18 @@
 
         function showNotificationAndVictory() {
             pauseBackgroundMusic();
-             sounds.pomodoroComplete.play().then(() => {
-                victoryMessage.classList.add('active');
-                notificationPopup.classList.add('active');
-                sessionCount++;
-                updateSessionCounter();
-                checkAchievements();
-                setTimeout(() => {
-                    victoryMessage.classList.remove('active');
-                }, 3000);
-            }).catch(error => {
+            sounds.pomodoroComplete.play().catch(error => {
                 console.error("Error playing pomodoro complete sound:", error);
-                // Handle error if the audio fails to play
-                victoryMessage.classList.add('active');
-                notificationPopup.classList.add('active');
-                sessionCount++;
-                updateSessionCounter();
-                checkAchievements();
-                setTimeout(() => {
-                    victoryMessage.classList.remove('active');
-                }, 3000);
             });
+            victoryMessage.classList.add('active');
+            notificationPopup.classList.add('active');
+            sessionCount++;
+            updateSessionCounter();
+            checkAchievements();
+            setTimeout(() => {
+                victoryMessage.classList.remove('active');
+            }, 3000);
         }
-
 
         function proceedToBreak() {
             notificationPopup.classList.remove('active');
@@ -819,7 +805,6 @@
             for (let sound in sounds) {
                 if (sound !== 'pomodoroComplete' && sound !== 'breakComplete') {
                     sounds[sound].pause();
-                    sounds[sound].currentTime = 0;  // Reset audio to the beginning
                 }
             }
         }
@@ -857,8 +842,7 @@
             leaf.style.left = `${Math.random() * 100}vw`;
             leaf.style.fontSize = `${Math.random() * 20 + 20}px`;
             leaf.style.animationDuration = `${Math.random() * 4 + 6}s`;
-            document.body.appendChild
-(leaf);
+            document.body.appendChild(leaf);
             setTimeout(() => leaf.remove(), 8000);
         }
 
